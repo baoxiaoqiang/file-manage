@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IAnalysisTaskDao">
+    <resultMap id="analysisTaskResultMap" type="cn.com.quanyou.ioc.file.manage.vo.AnalysisTaskBean">
+        <id property="dataId" jdbcType="VARCHAR" column="DATA_ID"/>
+        <result property="fileDataId" jdbcType="VARCHAR" column="FILE_DATA_ID"/>
+        <result property="taskType" jdbcType="VARCHAR" column="TASK_TYPE"/>
+        <result property="processStatus" jdbcType="VARCHAR" column="PROCESS_STATUS"/>
+        <result property="excelRowAnalysis" jdbcType="INTEGER" column="EXCEL_ROW_ANALYSIS"/>
+        <result property="processResult" jdbcType="VARCHAR" column="PROCESS_RESULT"/>
+        <result property="importUser" jdbcType="VARCHAR" column="IMPORT_USER"/>
+        <result property="creationDate" jdbcType="VARCHAR" column="CREATION_DATE"/>
+        <result property="lastUpdateDate" jdbcType="VARCHAR" column="LAST_UPDATE_DATE"/>
+        <result property="createdBy" jdbcType="VARCHAR" column="CREATED_BY"/>
+        <result property="lastUpdatedBy" jdbcType="VARCHAR" column="LAST_UPDATED_BY"/>
+        <result property="validStatus" jdbcType="INTEGER" column="VALID_STATUS"/>
+        <result property="reportDate" jdbcType="DATE" column="REPORT_DATE"/>
+    </resultMap>
+
+
+    <resultMap id="analysisTaskResultMapIncludeFileInfo" type="cn.com.quanyou.ioc.file.manage.vo.AnalysisTaskBean">
+        <id property="dataId" jdbcType="VARCHAR" column="DATA_ID"/>
+        <result property="fileDataId" jdbcType="VARCHAR" column="FILE_DATA_ID"/>
+        <result property="taskType" jdbcType="VARCHAR" column="TASK_TYPE"/>
+        <result property="processStatus" jdbcType="VARCHAR" column="PROCESS_STATUS"/>
+        <result property="excelRowAnalysis" jdbcType="INTEGER" column="EXCEL_ROW_ANALYSIS"/>
+        <result property="processResult" jdbcType="VARCHAR" column="PROCESS_RESULT"/>
+        <result property="importUser" jdbcType="VARCHAR" column="IMPORT_USER"/>
+        <result property="creationDate" jdbcType="VARCHAR" column="CREATION_DATE"/>
+        <result property="lastUpdateDate" jdbcType="VARCHAR" column="LAST_UPDATE_DATE"/>
+        <result property="createdBy" jdbcType="VARCHAR" column="CREATED_BY"/>
+        <result property="lastUpdatedBy" jdbcType="VARCHAR" column="LAST_UPDATED_BY"/>
+        <result property="validStatus" jdbcType="INTEGER" column="VALID_STATUS"/>
+        <result property="reportDate" jdbcType="DATE" column="REPORT_DATE"/>
+        <result property="factoryName" jdbcType="VARCHAR" column="FACTORY_NAME"/>
+        <result property="lineName" jdbcType="VARCHAR" column="LINE_NAME"/>
+        <association property="fileInfo" column="FILE_DATA_ID"
+                     resultMap="cn.com.quanyou.ioc.file.manage.dao.IUploadFileInfoDao.uploadFileInfoResultMap">
+
+        </association>
+
+    </resultMap>
+
+
+    <insert id="add" parameterType="cn.com.quanyou.ioc.file.manage.vo.AnalysisTaskBean">
+        <selectKey keyProperty="dataId" order="BEFORE" resultType="java.lang.String">
+            select SYS_GUID() as dataId from DUAL
+        </selectKey>
+        insert into IMPORT_ANALYSIS_TASK_EXCEL_T(
+        DATA_ID
+        ,FILE_DATA_ID
+        ,TASK_TYPE
+        ,PROCESS_STATUS
+        ,IMPORT_USER
+        ,EXCEL_ROW_ANALYSIS
+        <if test="creationDate !=null">
+            ,CREATION_DATE
+        </if>
+        <if test="lastUpdateDate !=null">
+            ,LAST_UPDATE_DATE
+        </if>
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        <if test="validStatus !=null">
+            ,VALID_STATUS
+        </if>
+            ,REPORT_DATE
+        <if test="shopName !=null">
+            ,SHOP_NAME
+        </if>
+        <if test="factoryName !=null">
+            ,FACTORY_NAME
+        </if>
+        <if test="lineName !=null">
+            ,LINE_NAME
+        </if>
+        )
+        VALUES (
+        #{dataId,jdbcType=VARCHAR}
+        ,#{fileDataId,jdbcType=VARCHAR}
+        ,#{taskType,jdbcType=VARCHAR}
+        ,#{processStatus,jdbcType=VARCHAR}
+        ,#{importUser,jdbcType=VARCHAR}
+        ,#{excelRowAnalysis,jdbcType=INTEGER}
+        <if test="creationDate !=null">
+            ,#{creationDate,jdbcType=DATE}
+        </if>
+        <if test="lastUpdateDate !=null">
+            ,#{lastUpdateDate,jdbcType=DATE}
+        </if>
+        ,#{createdBy,jdbcType=VARCHAR}
+        ,#{lastUpdatedBy,jdbcType=VARCHAR}
+        <if test="validStatus !=null">
+            ,#{validStatus,jdbcType=INTEGER}
+        </if>
+        ,#{reportDate,jdbcType=DATE}
+        <if test="shopName !=null">
+            ,#{shopName,jdbcType=VARCHAR}
+        </if>
+        <if test="factoryName !=null">
+            ,#{factoryName,jdbcType=VARCHAR}
+        </if>
+        <if test="lineName !=null">
+            ,#{lineName,jdbcType=VARCHAR}
+        </if>
+        )
+
+    </insert>
+
+    <select id="queryEntityByPrimaryKey" resultMap="analysisTaskResultMap">
+        select *
+        from IMPORT_ANALYSIS_TASK_EXCEL_T
+
+        WHERE DATA_ID = #{dataId}
+
+    </select>
+
+
+    <update id="updateByPrimaryKey" parameterType="cn.com.quanyou.ioc.file.manage.vo.AnalysisTaskBean">
+        update IMPORT_ANALYSIS_TASK_EXCEL_T set
+        LAST_UPDATE_DATE = sysdate
+        <if test="fileDataId !=null">
+            ,FILE_DATA_ID = #{fileDataId,jdbcType=VARCHAR}
+        </if>
+        <if test="taskType !=null">
+            ,TASK_TYPE = #{taskType,jdbcType=VARCHAR}
+        </if>
+        <if test="processStatus !=null">
+            ,PROCESS_STATUS = #{processStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="excelRowAnalysis !=null">
+            ,EXCEL_ROW_ANALYSIS = #{excelRowAnalysis,jdbcType=INTEGER}
+        </if>
+        <if test="processResult !=null">
+            ,PROCESS_RESULT = #{ processResult,jdbcType=VARCHAR}
+        </if>
+        <if test="createdBy !=null">
+            ,CREATED_BY = #{ createdBy,jdbcType=VARCHAR}
+        </if>
+        <if test="lastUpdatedBy !=null">
+            ,LAST_UPDATED_BY = #{ lastUpdatedBy,jdbcType=VARCHAR}
+        </if>
+        <if test="validStatus !=null">
+            ,VALID_STATUS = #{ validStatus,jdbcType=INTEGER}
+        </if>
+        where DATA_ID = #{dataId}
+    </update>
+
+    <select id="queryByImportType" resultMap="analysisTaskResultMapIncludeFileInfo">
+        select
+        A.*,B.FILE_NAME
+        from (
+        SELECT T.*, rownum rn FROM (select * from IMPORT_ANALYSIS_TASK_EXCEL_T order by CREATION_DATE desc) T
+        where
+        1=1
+        <if test="paramVo.importTypeSubList != null and paramVo.importTypeSubList.size>0">
+            and TASK_TYPE in
+            <foreach item="item" index="index" collection="paramVo.importTypeSubList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="paramVo.entrance == 'cds'">
+            <if test="paramVo.date != null">
+                <![CDATA[
+                            and CREATION_DATE >= #{paramVo.date,jdbcType=DATE}
+                        ]]>
+            </if>
+            <if test="paramVo.endTime != null">
+                <![CDATA[
+                            and CREATION_DATE < #{paramVo.endTime,jdbcType=DATE}+1
+                        ]]>
+            </if>
+        </if>
+        <if test="paramVo.entrance == null">
+            <if test="paramVo.date != null">
+                <![CDATA[
+                          and CREATION_DATE >= #{paramVo.date,jdbcType=DATE}
+                          and CREATION_DATE < #{paramVo.date,jdbcType=DATE}+1
+                        ]]>
+            </if>
+        </if>
+        ) A
+        left join UPLOAD_FILE_INFO_T B on A.FILE_DATA_ID = B.DATA_ID
+        WHERE
+        rn BETWEEN #{startRow}
+        AND #{endRow}
+        <if test="paramVo.importTypeSubList != null and paramVo.importTypeSubList.size>0">
+            and TASK_TYPE in
+            <foreach item="item" index="index" collection="paramVo.importTypeSubList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="paramVo.entrance == 'cds'">
+            <if test="paramVo.date != null">
+                <![CDATA[
+                            and a.CREATION_DATE >= #{paramVo.date,jdbcType=DATE}
+                        ]]>
+            </if>
+            <if test="paramVo.endTime != null">
+                <![CDATA[
+                            and a.CREATION_DATE < #{paramVo.endTime,jdbcType=DATE}+1
+                        ]]>
+            </if>
+        </if>
+        <if test="paramVo.entrance == null">
+            <if test="paramVo.date != null">
+                <![CDATA[
+                          and a.CREATION_DATE >= #{paramVo.date,jdbcType=DATE}
+                          and a.CREATION_DATE < #{paramVo.date,jdbcType=DATE}+1
+                        ]]>
+            </if>
+        </if>
+        ORDER by a.CREATION_DATE desc
+    </select>
+
+    <select id="queryByImportTypeCount" resultType="integer">
+        select
+        count(1)
+        from IMPORT_ANALYSIS_TASK_EXCEL_T A
+        WHERE
+        1=1
+        <if test="importTypeSubList != null and importTypeSubList.size>0">
+            and TASK_TYPE in
+            <foreach item="item" index="index" collection="importTypeSubList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="entrance == 'cds'">
+            <if test="date != null">
+                <![CDATA[
+                        and CREATION_DATE >= #{date,jdbcType=DATE}
+                    ]]>
+            </if>
+            <if test="endTime != null">
+                <![CDATA[
+                        and CREATION_DATE < #{endTime,jdbcType=DATE}+1
+                    ]]>
+            </if>
+        </if>
+        <if test="entrance == null">
+            <if test="date != null">
+                <![CDATA[
+                      and CREATION_DATE >= #{date,jdbcType=DATE}
+                      and CREATION_DATE < #{date,jdbcType=DATE}+1
+                    ]]>
+            </if>
+        </if>
+    </select>
+
+    <select id="queryShopNameByTaskId" resultType="string">
+        select SHOP_NAME shopName
+        from IMPORT_ANALYSIS_TASK_EXCEL_T t
+        WHERE t.DATA_ID = #{taskId}
+    </select>
+</mapper>

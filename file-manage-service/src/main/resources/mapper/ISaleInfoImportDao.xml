@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.ISaleInfoImportDao">
+    <resultMap id="BaseResultMap" type="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.SaleInfoBean">
+        <id column="DATA_ID" jdbcType="VARCHAR" property="dataId" />
+        <result column="SALE_DATE" jdbcType="TIMESTAMP" property="saleDate" />
+        <result column="PROVINCE" jdbcType="VARCHAR" property="province" />
+        <result column="SHOP_NAME" jdbcType="VARCHAR" property="shopName" />
+        <result column="ORDER_NUMBER" jdbcType="NUMERIC" property="orderNumber" />
+        <result column="ORDER_AMOUNT" jdbcType="NUMERIC" property="orderAmount" />
+        <result column="CREATION_DATE" jdbcType="TIMESTAMP" property="creationDate" />
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy" />
+        <result column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" property="lastUpdateDate" />
+        <result column="LAST_UPDATED_BY" jdbcType="VARCHAR" property="lastUpdatedBy" />
+    </resultMap>
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_SALE_INFO_TMP_T
+        (
+        SALE_DATE
+        ,PROVINCE
+        ,SHOP_NAME
+        ,ORDER_NUMBER
+        ,ORDER_AMOUNT
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.saleDate,jdbcType=VARCHAR}
+            ,#{item.province,jdbcType=VARCHAR}
+            ,#{item.shopName,jdbcType=VARCHAR}
+            ,#{item.orderNumber,jdbcType=VARCHAR}
+            ,#{item.orderAmount,jdbcType=VARCHAR}
+            ,#{item.createdBy,jdbcType=VARCHAR}
+            ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+            ,#{item.rowNumber,jdbcType=INTEGER}
+            ,#{item.taskId,jdbcType=VARCHAR}
+            ,#{item.reportDate,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+
+    </insert>
+
+    <insert id="cloneFromTempT">
+    insert into IMPORT_S_SALE_INFO_T (
+        SALE_DATE
+        ,PROVINCE
+        ,SHOP_NAME
+        ,ORDER_NUMBER
+        ,ORDER_AMOUNT
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+
+)   select
+        to_date(SALE_DATE,'yyyyMM')
+        ,PROVINCE
+        ,SHOP_NAME
+        ,ORDER_NUMBER
+        ,ORDER_AMOUNT
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        from IMPORT_S_SALE_INFO_TMP_T where TASK_ID = #{taskId}
+    </insert>
+    <delete id="deleteByTaskId">
+
+        delete  from IMPORT_S_SALE_INFO_T where SALE_DATE =
+        (
+        select to_date(SALE_DATE,'yyyyMM') from IMPORT_S_SALE_INFO_TMP_T where TASK_ID = #{taskId}and rownum=1)
+
+    </delete>
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID
+        ,SALE_DATE
+        ,PROVINCE
+        ,SHOP_NAME
+        ,ORDER_NUMBER
+        ,ORDER_AMOUNT
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        from IMPORT_S_SALE_INFO_TMP_T
+
+        where  TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+
+    </select>
+
+    <update id="updateValidStatusByDataIds" >
+        update IMPORT_S_SALE_INFO_TMP_T set VALID_STATUS = #{validStatusCode} where DATA_ID in
+
+        <foreach item="item"  index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_SALE_INFO_TMP_T where VALID_STATUS != 1 and TASK_ID = #{taskId}
+    </select>
+
+    <!-- 查询 -->
+    <select id="search" resultMap="BaseResultMap">
+
+        select
+        A.*
+        from (
+        SELECT T.*, rownum rn FROM (select * from IMPORT_S_SALE_INFO_T order by SALE_DATE desc ,SHOP_NAME asc ) T
+        WHERE 1=1
+        <include refid="searchWhereSql"/>
+        ) A
+        WHERE
+        rn BETWEEN #{startRow}
+        AND #{endRow}
+        <include refid="searchWhereSql"/>
+
+    </select>
+
+    <select id="querySearchTotal" resultType="integer">
+        select count(1) from IMPORT_S_SALE_INFO_T WHERE 1=1
+        <include refid="searchWhereSql"/>
+    </select>
+
+    <sql id="searchWhereSql">
+
+        <if test="searchParam.provinces != null and searchParam.provinces.size > 0">
+            and PROVINCE in
+            <foreach item="item"  index="index" collection="searchParam.provinces" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="searchParam.shopName != null and searchParam.shopName.size>0">
+            and SHOP_NAME in
+            <foreach item="item"  index="index" collection="searchParam.shopName" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="searchParam.dates != null and searchParam.dates.size>0">
+            and
+            <foreach item="dateList" index="index" collection="searchParam.dates" open="(" separator="or" close=")">
+
+                <foreach  collection="dateList" item="it" index="index" open="(" close=")" separator="and">
+                    <if test="index == 0">
+                        <![CDATA[
+                            SALE_DATE >=#{it}
+                        ]]>
+                    </if>
+                    <if test="index == 1">
+                        <![CDATA[
+                            SALE_DATE <=#{it}
+                        ]]>
+                    </if>
+                </foreach>
+            </foreach>
+
+        </if>
+
+    </sql>
+
+</mapper>

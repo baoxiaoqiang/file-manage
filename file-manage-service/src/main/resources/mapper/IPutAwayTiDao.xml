@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IPutAwayTiDao">
+
+    <!-- 使用存储过程-->
+    <insert id="cloneFromTempT" statementType="CALLABLE">
+        {call iocemall.newproduct_putaway_add(#{taskId,mode=IN,jdbcType=VARCHAR})}
+    </insert>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_PUTAWAY_TI(
+            PRODUCT_TYPE,
+            RE_SHOOTING_REASON,
+            PRODUCT_NAME,
+            PRODUCT_BATCH,
+            CREATED_BY,
+            LAST_UPDATED_BY,
+            ROW_NUMBER,
+            TASK_ID
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+                select
+                    #{item.productType,jdbcType=VARCHAR},
+                    #{item.reShootingReason,jdbcType=VARCHAR},
+                    #{item.productName,jdbcType=VARCHAR},
+                    #{item.productBatch,jdbcType=VARCHAR},
+                    #{item.createdBy,jdbcType=VARCHAR},
+                    #{item.lastUpdatedBy,jdbcType=VARCHAR},
+                    #{item.rowNumber,jdbcType=INTEGER},
+                    #{item.taskId,jdbcType=VARCHAR}
+                from dual
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteByTaskId">
+        DELETE FROM IMPORT_S_PUTAWAY_T
+    </delete>
+
+    <select id="queryByTaskId" resultType="map">
+        select
+            DATA_ID,
+            PRODUCT_TYPE,
+            RE_SHOOTING_REASON,
+            PRODUCT_NAME,
+            PRODUCT_BATCH,
+            ROW_NUMBER ,
+            TASK_ID
+        from IMPORT_S_PUTAWAY_TI
+        where TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+    </select>
+
+    <update id="updateValidStatusByDataIds">
+        update IMPORT_S_PUTAWAY_TI set VALID_STATUS = #{validStatusCode} where DATA_ID in
+        <foreach item="item" index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_PUTAWAY_TI where TASK_ID = #{taskId} and VALID_STATUS != 1
+    </select>
+
+    <select id="listUnPutwayRecord" resultType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.PutAwayTi">
+        select
+            PRODUCT_NAME as productName,
+            decode(NEW_TYPE_CODE, 1, '新品', 2, '翻拍') as productType
+        from EMALL_NEW_PRODUCT_T where ON_SHELF_STATUS = 0
+    </select>
+</mapper>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IB2CProductDimTiDao">
+
+    <update  id="cloneFromTempT">
+        MERGE INTO iocemall.dim_product_t t
+          USING (SELECT t1.*,
+                        t2.product_class_code,
+                        t3.product_style_code,
+                        t4.product_space_code,
+                        t5.product_material_code,
+                        t6.product_age_code,
+                        t7.product_function_code
+                   FROM import_b2c_product_dim_ti t1
+                   LEFT JOIN iocemall.dim_product_class_t t2
+                     ON t1.category = t2.product_class_name
+                   LEFT JOIN iocemall.dim_product_style_t t3
+                     ON t1.style = t3.product_style_name
+                   LEFT JOIN iocemall.dim_product_space_t t4
+                     ON t1.space = t4.product_space_name
+                   LEFT JOIN iocemall.dim_product_material_t t5
+                     ON t1.material = t5.product_material_name
+                   LEFT JOIN iocemall.dim_product_age_t t6
+                     ON t1.age = t6.product_age_name
+                   LEFT JOIN iocemall.dim_product_function_t t7
+                     ON t1.category_detail = t7.product_function_name
+                  WHERE t1.task_id = #{taskId}) a
+          ON (t.product_code = a.product_code)
+          WHEN MATCHED THEN
+            UPDATE
+               SET t.product_name          = a.product_name,
+--                    t.product_class_code    = nvl(a.product_class_code,0),
+                   t.product_style_code    = nvl(a.product_style_code,0),
+                   t.product_space_code    = nvl(a.product_space_code,0),
+                   t.product_material_code = nvl(a.product_material_code,0),
+                   t.product_age_code      = nvl(a.product_age_code,0),
+                   t.product_function_code = nvl(a.product_function_code,0),
+                   t.last_update_date      = SYSDATE,
+                   t.last_updated_by       = a.last_updated_by
+          WHEN NOT MATCHED THEN
+            INSERT
+              (product_code,
+               product_name,
+               created_by,
+               last_updated_by,
+               source_sys,
+--                product_class_code,
+               product_style_code,
+               product_space_code,
+               product_material_code,
+               product_age_code,
+               product_function_code)
+            VALUES
+              (a.product_code,
+               a.product_name,
+               a.created_by,
+               a.last_updated_by,
+               'EXCEL',
+--                nvl(a.product_class_code,0),
+               nvl(a.product_style_code,0),
+               nvl(a.product_space_code,0),
+               nvl(a.product_material_code,0),
+               nvl(a.product_age_code,0),
+               nvl(a.product_function_code,0))
+    </update >
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO import_b2c_product_dim_ti
+            (product_code,
+            product_name,
+            CATEGORY,
+            style,
+            SPACE,
+            material,
+            age,
+            category_detail,
+            created_by,
+            last_updated_by,
+            row_number,
+            task_id)
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+                #{item.productCode,jdbcType=VARCHAR},
+                #{item.productName,jdbcType=VARCHAR},
+                #{item.category,jdbcType=VARCHAR},
+                #{item.style,jdbcType=VARCHAR},
+                #{item.space,jdbcType=VARCHAR},
+                #{item.material,jdbcType=VARCHAR},
+                #{item.age,jdbcType=VARCHAR},
+                #{item.categoryDetail,jdbcType=VARCHAR},
+                #{item.createdBy,jdbcType=VARCHAR},
+                #{item.lastUpdatedBy,jdbcType=VARCHAR},
+                #{item.rowNumber,jdbcType=VARCHAR},
+                #{item.taskId,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="queryByTaskId" resultType="map">
+        select
+            data_id,
+            product_code,
+            product_name,
+            category,
+            style,
+            space,
+            material,
+            age,
+            category_detail,
+            row_number,
+            task_id
+        from import_b2c_product_dim_ti
+        where TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+    </select>
+
+    <update id="updateValidStatusByDataIds">
+        update import_b2c_product_dim_ti set VALID_STATUS = #{validStatusCode} where
+        <foreach item="item" index="index" collection="dataIds" open="(" separator="or" close=")">
+            DATA_ID = #{item}
+        </foreach>
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from import_b2c_product_dim_ti where TASK_ID = #{taskId} and VALID_STATUS != 1
+    </select>
+
+    <select id="getProductDimList" resultType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.IocemallProductDim">
+        select t.product_code as productCode,t.product_name as productName from iocemall.dim_product_t t
+    </select>
+
+    <select id="getClassDimList" resultType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.IocemallProductDim">
+        select t.product_class_code as code,t.product_class_name as name from iocemall.dim_product_class_t t
+    </select>
+
+    <select id="getStyleDimList" resultType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.IocemallProductDim">
+        select t.product_style_code as code,t.product_style_name as name from iocemall.dim_product_style_t t
+    </select>
+
+    <select id="getSpaceDimList" resultType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.IocemallProductDim">
+        select t.product_space_code as code,t.product_space_name as name from iocemall.dim_product_space_t t
+    </select>
+
+    <select id="getMaterialDimList" resultType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.IocemallProductDim">
+        select t.product_material_code as code,t.product_material_name as name from iocemall.dim_product_material_t t
+    </select>
+
+    <select id="getAgeDimList" resultType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.IocemallProductDim">
+        select t.product_age_code as code,t.product_age_name as name from iocemall.dim_product_age_t t
+    </select>
+
+    <select id="getFunctionDimList" resultType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.IocemallProductDim">
+        select t.product_function_code as code,t.product_function_name as name from iocemall.dim_product_function_t t
+    </select>
+
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IRelationDataValidateDao">
+
+    <select id="queryShopNames" resultType="map" >
+        select t.dim_name shop_name
+        from dim_emall_store t
+    </select>
+
+    <select id="queryProvinces" resultType="map">
+        select t.dim_name province
+        from dim_emall_province t
+    </select>
+    <select id="queryReviewTypes" resultType="map">
+        SELECT t2.dim_name review_type, t1.dim_name review_subtype
+        FROM dim_emall_review_subtype t1
+        INNER JOIN dim_emall_review_type t2 ON t1.review_type_code = t2.dim_code
+    </select>
+
+</mapper>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IAnalysisTaskErrorDao">
+    <resultMap id="analysisTaskResultMap" type="cn.com.quanyou.ioc.file.manage.vo.AnalysisTaskErrorBean">
+        <id property="dataId" jdbcType="VARCHAR" column="DATA_ID"/>
+        <result property="taskId" jdbcType="VARCHAR" column="TASK_ID"/>
+        <result property="row" jdbcType="INTEGER" column="ROW_NUM"/>
+        <result property="cellName" jdbcType="VARCHAR" column="CELL_NAME"/>
+        <result property="errorInfo" jdbcType="VARCHAR" column="ERROR_INFO"/>
+        <result property="creationDate" jdbcType="DATE" column="CREATION_DATE"/>
+        <result property="lastUpdateDate" jdbcType="DATE" column="LAST_UPDATE_DATE"/>
+        <result property="createdBy" jdbcType="VARCHAR" column="CREATED_BY"/>
+        <result property="lastUpdatedBy" jdbcType="VARCHAR" column="LAST_UPDATED_BY"/>
+        <result property="validStatus" jdbcType="INTEGER" column="VALID_STATUS"/>
+    </resultMap>
+
+    <insert id="addAnalysisTaskErrorBatch" parameterType="java.util.List">
+        INSERT INTO IMPORT_ANALYSIS_TASK_EXCEL_ERRORS_T
+            (
+                TASK_ID
+                ,ROW_NUM
+                ,CELL_NAME
+                ,ERROR_INFO
+                ,CREATED_BY
+                ,LAST_UPDATED_BY
+            )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+          select
+                #{item.taskId,jdbcType=VARCHAR}
+                ,#{item.row,jdbcType=INTEGER}
+                ,#{item.cellName,jdbcType=VARCHAR}
+                ,#{item.errorInfo,jdbcType=VARCHAR}
+                ,#{item.createdBy,jdbcType=VARCHAR}
+                ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+
+    </insert>
+
+
+    <insert id="add" parameterType="cn.com.quanyou.ioc.file.manage.vo.AnalysisTaskBean">
+        <selectKey keyProperty="dataId" order="BEFORE" resultType="java.lang.String">
+            select SYS_GUID() as dataId from DUAL
+        </selectKey>
+        insert into IMPORT_ANALYSIS_TASK_EXCEL_ERRORS_T(
+            DATA_ID
+            ,FILE_DATA_ID
+            ,PROCESS_STATUS
+            ,EXCEL_ROW_ANALYSIS
+            <if test="creationDate !=null">
+            ,CREATION_DATE
+            </if>
+            <if test="lastUpdateDate !=null">
+            ,LAST_UPDATE_DATE
+            </if>
+            ,CREATED_BY
+            ,LAST_UPDATED_BY
+            <if test="validStatus !=null">
+            ,VALID_STATUS
+            </if>
+          )
+          VALUES (
+            #{dataId,jdbcType=VARCHAR}
+            ,#{fileDataId,jdbcType=VARCHAR}
+            ,#{processStatus,jdbcType=VARCHAR}
+            ,#{excelRowAnalysis,jdbcType=INTEGER}
+        <if test="creationDate !=null">
+            ,#{creationDate,jdbcType=DATE}
+        </if>
+        <if test="lastUpdateDate !=null">
+            ,#{lastUpdateDate,jdbcType=DATE}
+        </if>
+            ,#{createdBy,jdbcType=VARCHAR}
+            ,#{lastUpdatedBy,jdbcType=VARCHAR}
+        <if test="validStatus !=null">
+            ,#{validStatus,jdbcType=INTEGER}
+        </if>
+          )
+
+    </insert>
+
+    <select id="queryEntityByPrimaryKey" resultMap="analysisTaskResultMap">
+        select
+          *
+          from IMPORT_ANALYSIS_TASK_EXCEL_ERRORS_T
+
+          WHERE DATA_ID = #{dataId}
+
+    </select>
+
+    <select id="queryByTaskId" resultMap="analysisTaskResultMap">
+        select
+        A.*
+        from (
+        SELECT T.*, rownum rn FROM (select * from IMPORT_ANALYSIS_TASK_EXCEL_ERRORS_T
+         order by ROW_NUM ASC) T where TASK_ID = #{taskId}
+        ) A
+        WHERE
+        rn BETWEEN #{startRow}
+        AND #{endRow}
+        and  A.TASK_ID = #{taskId}
+    </select>
+
+    <select id="queryByTaskIdCount" resultType="java.lang.Integer">
+         select
+        count(1)
+        from
+        IMPORT_ANALYSIS_TASK_EXCEL_ERRORS_T
+        WHERE
+        TASK_ID = #{taskId}
+
+    </select>
+
+
+    <update id="updateByPrimaryKey" parameterType="cn.com.quanyou.ioc.file.manage.vo.AnalysisTaskBean">
+      update IMPORT_ANALYSIS_TASK_EXCEL_ERRORS_T set
+      LAST_UPDATE_DATE = sysdate
+        <if test="fileDataId !=null">
+            ,FILE_DATA_ID = #{fileDataId,jdbcType=VARCHAR}
+        </if>
+        <if test="taskType !=null">
+            ,TASK_TYPE = #{taskType,jdbcType=VARCHAR}
+        </if>
+        <if test="processStatus !=null">
+      ,PROCESS_STATUS = #{processStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="excelRowAnalysis !=null">
+      ,EXCEL_ROW_ANALYSIS = #{excelRowAnalysis,jdbcType=INTEGER}
+        </if>
+        <if test="processResult !=null">
+      ,PROCESS_RESULT = #{ processResult,jdbcType=VARCHAR}
+        </if>
+        <if test="createBy !=null">
+      ,CREATED_BY = #{ createBy,jdbcType=VARCHAR}
+        </if>
+        <if test="lastUpdatedBy !=null">
+      ,LAST_UPDATED_BY = #{ lastUpdatedBy,jdbcType=VARCHAR}
+        </if>
+        <if test="validStatus !=null">
+      ,VALID_STATUS = #{ validStatus,jdbcType=INTEGER}
+        </if>
+      where DATA_ID = #{dataId}
+    </update>
+</mapper>

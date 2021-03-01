@@ -1,0 +1,45 @@
+server:
+  port: 9033
+
+spring:
+  application:
+    name: file-manage
+  datasource:
+    url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=172.30.3.220)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=mdkbuat)))
+    username: iocimport
+    password: QYdb2019
+    ##type: org.apache.tomcat.jdbc.pool.DataSource
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+  freemarker:
+    template-loader-path: classpath:/templates
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://SJKB-prod-APP01:9022/eureka/,http://SJKB-prod-APP02:9022/eureka/,http://SJKB-prod-APP03:9022/eureka/
+ribbon:
+  eureka:
+    enabled: true
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+
+pagehelper:
+  helperDialect: oracle9i
+  reasonable: false
+  supportMethodsArguments: true
+  params: count=countSql
+
+swagger:
+  enable: false
+
+file:
+  max-file-size: 50
+  max-request-size: 500
+#fdfs客户端配置
+fdfs:
+  tracker-server: 172.30.2.133:22122
+  domain-name: http://image.quanyou.com.cn/

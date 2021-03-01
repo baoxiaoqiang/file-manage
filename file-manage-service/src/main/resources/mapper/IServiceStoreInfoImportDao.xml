@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IServiceStoreInfoImportDao">
+
+    <resultMap id="BaseResultMap" type="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.ImportNewStoreInfo">
+        <id column="DATA_ID" jdbcType="VARCHAR" property="dataId" />
+        <result column="SHOP_CODE" jdbcType="VARCHAR" property="shopCode" />
+        <result column="SHOP_NAME" jdbcType="VARCHAR" property="shopName" />
+        <result column="BUSINESS_TYPE_NAME" jdbcType="VARCHAR" property="businessTypeName" />
+        <result column="SHOP_TYPE_NAME" jdbcType="NUMERIC" property="shopTypeName" />
+        <result column="CDS_ACCOUNT_CODE" jdbcType="NUMERIC" property="cdsAccountCode" />
+        <result column="AGENCY_NAME" jdbcType="NUMERIC" property="agencyName" />
+        <result column="CITY_LEVEL_NAME" jdbcType="NUMERIC" property="cityLevelName" />
+        <result column="STREET_NAME" jdbcType="NUMERIC" property="streetName" />
+        <result column="PROVINCE_NAME" jdbcType="NUMERIC" property="provinceName" />
+        <result column="CITY_NAME" jdbcType="NUMERIC" property="cityName" />
+        <result column="DISTRICT_NAME" jdbcType="NUMERIC" property="districtName" />
+        <result column="SHOP_WARDROBE_AREA" jdbcType="NUMERIC" property="shopWardrobeArea" />
+        <result column="SHOP_CABINET_AREA" jdbcType="NUMERIC" property="shopCabinetArea" />
+        <result column="SHOP_SANITARY_WARE_AREA" jdbcType="NUMERIC" property="shopSanitaryWareArea" />
+        <result column="SHOP_SHOWROOM_AREA" jdbcType="NUMERIC" property="shopShowroomArea" />
+        <result column="SHOWROOM_TYPE_NAME" jdbcType="NUMERIC" property="showroomTypeName" />
+        <result column="SHOP_STATUS" jdbcType="NUMERIC" property="shopStatus" />
+        <result column="CREATION_DATE" jdbcType="TIMESTAMP" property="creationDate" />
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy" />
+        <result column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" property="lastUpdateDate" />
+        <result column="LAST_UPDATED_BY" jdbcType="VARCHAR" property="lastUpdatedBy" />
+    </resultMap>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_CDS_DIM_SHOP_TI
+        (
+        SHOP_CODE
+        ,SHOP_NAME
+        ,BUSINESS_TYPE_NAME
+        ,SHOP_TYPE_NAME
+        ,CDS_ACCOUNT_CODE
+        ,AGENCY_NAME
+        ,CITY_LEVEL_NAME
+        ,PROVINCE_NAME
+        ,CITY_NAME
+        ,DISTRICT_NAME
+        ,STREET_NAME
+        ,SHOP_WARDROBE_AREA
+        ,SHOP_CABINET_AREA
+        ,SHOP_SANITARY_WARE_AREA
+        ,SHOP_SHOWROOM_AREA
+        ,SHOWROOM_TYPE_NAME
+        ,SHOP_STATUS
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.shopCode,jdbcType=VARCHAR}
+            ,#{item.shopName,jdbcType=VARCHAR}
+            ,#{item.businessTypeName,jdbcType=VARCHAR}
+            ,#{item.shopTypeName,jdbcType=VARCHAR}
+            ,#{item.cdsAccountCode,jdbcType=VARCHAR}
+            ,#{item.agencyName,jdbcType=VARCHAR}
+            ,#{item.cityLevelName,jdbcType=VARCHAR}
+            ,#{item.provinceName,jdbcType=VARCHAR}
+            ,#{item.cityName,jdbcType=VARCHAR}
+            ,#{item.districtName,jdbcType=VARCHAR}
+            ,#{item.streetName,jdbcType=VARCHAR}
+            ,#{item.shopWardrobeArea,jdbcType=VARCHAR}
+            ,#{item.shopCabinetArea,jdbcType=VARCHAR}
+            ,#{item.shopSanitaryWareArea,jdbcType=VARCHAR}
+            ,#{item.shopShowroomArea,jdbcType=VARCHAR}
+            ,#{item.showroomTypeName,jdbcType=VARCHAR}
+            ,#{item.shopStatus,jdbcType=VARCHAR}
+            ,#{item.createdBy,jdbcType=VARCHAR}
+            ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+            ,#{item.rowNumber,jdbcType=INTEGER}
+            ,#{item.taskId,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+
+    </insert>
+
+    <insert id="cloneFromTempT" statementType="CALLABLE">
+        {call ioccds.bl_cds_import_pkg.import_dim_shop_p(#{taskId,mode=IN,jdbcType=VARCHAR})}
+    </insert>
+
+    <delete id="deleteByTaskId">
+
+        delete  from IMPORT_CDS_DIM_SHOP_TI where 1 = 1
+
+        AND trunc(CREATION_DATE) =
+        (
+        select to_date(CREATION_DATE,'yyyyMMdd') from IMPORT_CDS_DIM_SHOP_TI where TASK_ID = #{taskId}and rownum=1)
+
+    </delete>
+
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID
+        ,SHOP_CODE
+        ,SHOP_NAME
+        ,BUSINESS_TYPE_NAME
+        ,SHOP_TYPE_NAME
+        ,CDS_ACCOUNT_CODE
+        ,AGENCY_NAME
+        ,CITY_LEVEL_NAME
+        ,PROVINCE_NAME
+        ,CITY_NAME
+        ,DISTRICT_NAME
+        ,STREET_NAME
+        ,SHOP_WARDROBE_AREA
+        ,SHOP_CABINET_AREA
+        ,SHOP_SANITARY_WARE_AREA
+        ,SHOP_SHOWROOM_AREA
+        ,SHOWROOM_TYPE_NAME
+        ,SHOP_STATUS
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        from IMPORT_CDS_DIM_SHOP_TI
+
+        where  TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+
+    </select>
+
+    <update id="updateValidStatusByDataIds" >
+        update IMPORT_CDS_DIM_SHOP_TI set VALID_STATUS = #{validStatusCode} where DATA_ID in
+
+        <foreach item="item"  index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_CDS_DIM_SHOP_TI where VALID_STATUS != 1 and TASK_ID = #{taskId}
+    </select>
+
+    <!-- 查询 -->
+    <select id="search" resultMap="BaseResultMap">
+
+        select
+        A.*
+        from (
+        SELECT T.*, rownum rn FROM (select * from IMPORT_CDS_DIM_SHOP_TI order by CREATION_DATE desc ,SHOP_NAME asc ) T
+        WHERE 1=1
+        <include refid="searchWhereSql"/>
+        ) A
+        WHERE
+        rn BETWEEN #{startRow}
+        AND #{endRow}
+        <include refid="searchWhereSql"/>
+
+    </select>
+
+    <select id="querySearchTotal" resultType="integer">
+        select count(1) from IMPORT_CDS_DIM_SHOP_TI WHERE 1=1
+        <include refid="searchWhereSql"/>
+    </select>
+
+    <sql id="searchWhereSql">
+        <if test="searchParam.startDate !=null">
+            <![CDATA[
+            and trunc(CREATION_DATE) >=#{searchParam.startDate}
+            ]]>
+        </if>
+
+        <if test="searchParam.endDate !=null">
+            <![CDATA[
+            and trunc(CREATION_DATE) <=#{searchParam.endDate}
+            ]]>
+        </if>
+    </sql>
+
+
+</mapper>

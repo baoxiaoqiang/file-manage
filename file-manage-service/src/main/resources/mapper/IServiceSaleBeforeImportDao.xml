@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IServiceSaleBeforeImportDao">
+
+    <resultMap id="BaseResultMap" type="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.ServiceSaleBeforeBean">
+        <id column="DATA_ID" jdbcType="VARCHAR" property="dataId" />
+        <result column="SALE_DATE" jdbcType="TIMESTAMP" property="saleDate" />
+        <result column="SHOP_NAME" jdbcType="VARCHAR" property="shopName" />
+        <result column="USER_NAME" jdbcType="VARCHAR" property="userName" />
+        <result column="SALE_VOLUME" jdbcType="NUMERIC" property="saleVolume" />
+        <result column="COMPLETE_REFUND_MONEY" jdbcType="NUMERIC" property="completeRefundMoney" />
+        <result column="COUNSELLING_USER_NUM" jdbcType="NUMERIC" property="counsellingUserNum" />
+        <result column="RECEPTION_USER_NUM" jdbcType="NUMERIC" property="receptionUserNum" />
+        <result column="ASK_PAY_RATE" jdbcType="NUMERIC" property="askPayRate" />
+        <result column="CUSTOMER_SERVICE_EVALUATE_RATE" jdbcType="NUMERIC" property="customerServiceEvaluateRate" />
+        <result column="USER_SATISFACTION_RATE" jdbcType="NUMERIC" property="userSatisfactionRate" />
+        <result column="USER_PER_PRICE" jdbcType="NUMERIC" property="userPerPrice" />
+        <result column="WANGWANG_REPLY_RATE" jdbcType="NUMERIC" property="wangwangReplyRate" />
+        <result column="RESPONSE_TIME_AVERAGE" jdbcType="NUMERIC" property="responseTimeAverage" />
+        <result column="ASK_ANSWER_COMPARE" jdbcType="NUMERIC" property="askAnswerCompare" />
+        <result column="WORK_DAYS" jdbcType="NUMERIC" property="workDays" />
+        <result column="SERVICE_MINUTES" jdbcType="NUMERIC" property="serviceMinutes" />
+        <result column="SERVICE_MINUTES_PER_DAY" jdbcType="NUMERIC" property="serviceMinutesPerDay" />
+        <result column="HANG_UP_MINUTES" jdbcType="NUMERIC" property="hangUpMinutes" />
+        <result column="CREATION_DATE" jdbcType="TIMESTAMP" property="creationDate" />
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy" />
+        <result column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" property="lastUpdateDate" />
+        <result column="LAST_UPDATED_BY" jdbcType="VARCHAR" property="lastUpdatedBy" />
+    </resultMap>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_SERVICE_SALE_BEFORE_TMP_T
+        (
+        SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,SALE_VOLUME
+        ,COMPLETE_REFUND_MONEY
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,ASK_PAY_RATE
+        ,CUSTOMER_SERVICE_EVALUATE_RATE
+        ,USER_SATISFACTION_RATE
+        ,USER_PER_PRICE
+        ,WANGWANG_REPLY_RATE
+        ,RESPONSE_TIME_AVERAGE
+        ,ASK_ANSWER_COMPARE
+        ,WORK_DAYS
+        ,SERVICE_MINUTES
+        ,SERVICE_MINUTES_PER_DAY
+        ,HANG_UP_MINUTES
+
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.saleDate,jdbcType=VARCHAR}
+            ,#{item.shopName,jdbcType=VARCHAR}
+            ,#{item.userName,jdbcType=VARCHAR}
+            ,#{item.saleVolume,jdbcType=VARCHAR}
+            ,#{item.completeRefundMoney,jdbcType=VARCHAR}
+            ,#{item.counsellingUserNum,jdbcType=VARCHAR}
+            ,#{item.receptionUserNum,jdbcType=VARCHAR}
+            ,#{item.askPayRate,jdbcType=VARCHAR}
+            ,#{item.customerServiceEvaluateRate,jdbcType=VARCHAR}
+            ,#{item.userSatisfactionRate,jdbcType=VARCHAR}
+            ,#{item.userPerPrice,jdbcType=VARCHAR}
+            ,#{item.wangwangReplyRate,jdbcType=VARCHAR}
+            ,#{item.responseTimeAverage,jdbcType=VARCHAR}
+            ,#{item.askAnswerCompare,jdbcType=VARCHAR}
+            ,#{item.workDays,jdbcType=VARCHAR}
+            ,#{item.serviceMinutes,jdbcType=VARCHAR}
+            ,#{item.serviceMinutesPerDay,jdbcType=VARCHAR}
+            ,#{item.hangUpMinutes,jdbcType=VARCHAR}
+
+            ,#{item.createdBy,jdbcType=VARCHAR}
+            ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+            ,#{item.rowNumber,jdbcType=INTEGER}
+            ,#{item.taskId,jdbcType=VARCHAR}
+            ,#{item.reportDate,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+
+    </insert>
+
+    <insert id="cloneFromTempT">
+    insert into IMPORT_S_SERVICE_SALE_BEFORE_T (
+        SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,SALE_VOLUME
+        ,COMPLETE_REFUND_MONEY
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,ASK_PAY_RATE
+        ,CUSTOMER_SERVICE_EVALUATE_RATE
+        ,USER_SATISFACTION_RATE
+        ,USER_PER_PRICE
+        ,WANGWANG_REPLY_RATE
+        ,RESPONSE_TIME_AVERAGE
+        ,ASK_ANSWER_COMPARE
+        ,WORK_DAYS
+        ,SERVICE_MINUTES
+        ,SERVICE_MINUTES_PER_DAY
+        ,HANG_UP_MINUTES
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+)   select
+        to_date(SALE_DATE,'yyyyMMdd')
+        ,SHOP_NAME
+        ,USER_NAME
+        ,SALE_VOLUME
+        ,COMPLETE_REFUND_MONEY
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,ASK_PAY_RATE
+        ,CUSTOMER_SERVICE_EVALUATE_RATE
+        ,USER_SATISFACTION_RATE
+        ,USER_PER_PRICE
+        ,WANGWANG_REPLY_RATE
+        ,RESPONSE_TIME_AVERAGE
+        ,ASK_ANSWER_COMPARE
+        ,WORK_DAYS
+        ,SERVICE_MINUTES
+        ,SERVICE_MINUTES_PER_DAY
+        ,HANG_UP_MINUTES
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        from IMPORT_S_SERVICE_SALE_BEFORE_TMP_T where TASK_ID = #{taskId}
+    </insert>
+    <insert id="cloneFromTempTByShop">
+    insert into IMPORT_S_SERVICE_SALE_BEFORE_T (
+        SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,SALE_VOLUME
+        ,COMPLETE_REFUND_MONEY
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,ASK_PAY_RATE
+        ,CUSTOMER_SERVICE_EVALUATE_RATE
+        ,USER_SATISFACTION_RATE
+        ,USER_PER_PRICE
+        ,WANGWANG_REPLY_RATE
+        ,RESPONSE_TIME_AVERAGE
+        ,ASK_ANSWER_COMPARE
+        ,WORK_DAYS
+        ,SERVICE_MINUTES
+        ,SERVICE_MINUTES_PER_DAY
+        ,HANG_UP_MINUTES
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+)   select
+        to_date(SALE_DATE,'yyyyMMdd')
+        ,SHOP_NAME
+        ,USER_NAME
+        ,SALE_VOLUME
+        ,COMPLETE_REFUND_MONEY
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,ASK_PAY_RATE
+        ,CUSTOMER_SERVICE_EVALUATE_RATE
+        ,USER_SATISFACTION_RATE
+        ,USER_PER_PRICE
+        ,WANGWANG_REPLY_RATE
+        ,RESPONSE_TIME_AVERAGE
+        ,ASK_ANSWER_COMPARE
+        ,WORK_DAYS
+        ,SERVICE_MINUTES
+        ,SERVICE_MINUTES_PER_DAY
+        ,HANG_UP_MINUTES
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        from IMPORT_S_SERVICE_SALE_BEFORE_TMP_T where TASK_ID = #{taskId} and SHOP_NAME = #{shopName}
+    </insert>
+    <delete id="deleteByTaskId">
+
+        delete  from IMPORT_S_SERVICE_SALE_BEFORE_T where 1 = 1
+
+        AND SALE_DATE =
+        (
+        select to_date(SALE_DATE,'yyyyMMdd') from IMPORT_S_SERVICE_SALE_BEFORE_TMP_T where TASK_ID = #{taskId}and rownum=1)
+
+    </delete>
+
+    <delete id="deleteByTaskIdAndShopName">
+
+        delete  from IMPORT_S_SERVICE_SALE_BEFORE_T where 1 = 1
+        AND SHOP_NAME = #{shopName}
+        AND SALE_DATE =
+        (
+        select to_date(SALE_DATE,'yyyyMMdd') from IMPORT_S_SERVICE_SALE_BEFORE_TMP_T where TASK_ID = #{taskId}and rownum=1)
+
+    </delete>
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID
+        ,SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,SALE_VOLUME
+        ,COMPLETE_REFUND_MONEY
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,ASK_PAY_RATE
+        ,CUSTOMER_SERVICE_EVALUATE_RATE
+        ,USER_SATISFACTION_RATE
+        ,USER_PER_PRICE
+        ,WANGWANG_REPLY_RATE
+        ,RESPONSE_TIME_AVERAGE
+        ,ASK_ANSWER_COMPARE
+        ,WORK_DAYS
+        ,SERVICE_MINUTES
+        ,SERVICE_MINUTES_PER_DAY
+        ,HANG_UP_MINUTES
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+
+        from IMPORT_S_SERVICE_SALE_BEFORE_TMP_T
+
+        where  TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+
+    </select>
+
+    <update id="updateValidStatusByDataIds" >
+        update IMPORT_S_SERVICE_SALE_BEFORE_TMP_T set VALID_STATUS = #{validStatusCode} where DATA_ID in
+
+        <foreach item="item"  index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_SERVICE_SALE_BEFORE_TMP_T where VALID_STATUS != 1 and TASK_ID = #{taskId}
+    </select>
+
+    <!-- 查询 -->
+    <select id="search" resultMap="BaseResultMap">
+
+        select
+        A.*
+        from (
+        SELECT T.*, rownum rn FROM (select * from IMPORT_S_SERVICE_SALE_BEFORE_T order by SALE_DATE desc ,SHOP_NAME asc ) T
+        WHERE 1=1
+        <include refid="searchWhereSql"/>
+        ) A
+        WHERE
+        rn BETWEEN #{startRow}
+        AND #{endRow}
+        <include refid="searchWhereSql"/>
+
+    </select>
+
+    <select id="querySearchTotal" resultType="integer">
+        select count(1) from IMPORT_S_SERVICE_SALE_BEFORE_T WHERE 1=1
+        <include refid="searchWhereSql"/>
+    </select>
+
+    <sql id="searchWhereSql">
+        <if test="searchParam.startDate !=null">
+            <![CDATA[
+            and SALE_DATE >=#{searchParam.startDate}
+            ]]>
+        </if>
+
+        <if test="searchParam.endDate !=null">
+            <![CDATA[
+            and SALE_DATE <=#{searchParam.endDate}
+            ]]>
+        </if>
+    </sql>
+
+
+</mapper>

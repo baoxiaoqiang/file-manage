@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IOperationalDataImportDao">
+
+    <resultMap id="BaseResultMap" type="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.OperationalDataBean">
+        <id column="DATA_ID" jdbcType="VARCHAR" property="dataId" />
+        <result column="SHOP_NAME" jdbcType="VARCHAR" property="shopName" />
+        <result column="SALE_DATE" jdbcType="TIMESTAMP" property="saleDate" />
+        <result column="PAY_AMOUNT" jdbcType="NUMERIC" property="payAmount" />
+        <result column="REFUND_WRONG_AMOUNT" jdbcType="NUMERIC" property="refundWrongAmount" />
+        <result column="REAL_SALE_AMOUNT" jdbcType="NUMERIC" property="realSaleAmount" />
+        <result column="PROMOTION_FEE" jdbcType="NUMERIC" property="promotionFee" />
+        <result column="VISTOR_COUNT" jdbcType="NUMERIC" property="vistorCount" />
+        <result column="VIEW_COUNT" jdbcType="NUMERIC" property="viewCount" />
+        <result column="PAY_CONVERSION_RATE" jdbcType="NUMERIC" property="payConversionRate" />
+        <result column="PAID_ORDER_COUNT" jdbcType="NUMERIC" property="paidOrderCount" />
+        <result column="PAID_BUYER_COUNT" jdbcType="NUMERIC" property="paidBuyerCount" />
+        <result column="REFUND_POST_SALE_WEEK" jdbcType="NUMERIC" property="refundPostSaleWeek" />
+        <result column="STORE_RANK" jdbcType="NUMERIC" property="storeRank" />
+        <result column="BOOKING_AMOUNT" jdbcType="NUMERIC" property="bookingAmount" />
+        <result column="BOOKING_PLUS_AMOUNT" jdbcType="NUMERIC" property="bookingPlusAmount" />
+        <result column="NEW_RETAIL_AMOUNT" jdbcType="NUMERIC" property="newRetailAmount" />
+        <result column="SALE_REMARK" jdbcType="NVARCHAR" property="saleRemark" />
+        <result column="CREATION_DATE" jdbcType="TIMESTAMP" property="creationDate" />
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy" />
+        <result column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" property="lastUpdateDate" />
+        <result column="LAST_UPDATED_BY" jdbcType="VARCHAR" property="lastUpdatedBy" />
+        <result column="AMOUNT_PER_BUYER" jdbcType="NUMERIC" property="amountPerBuyer" />
+        <result column="NONE_SALE_AMOUNT" jdbcType="NUMERIC" property="noneSaleAmount" />
+    </resultMap>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_SALE_DATA_TMP_T
+        (
+        SHOP_NAME
+        ,SALE_DATE
+        ,PAY_AMOUNT
+        ,REFUND_WRONG_AMOUNT
+        ,NONE_SALE_AMOUNT
+        ,REAL_SALE_AMOUNT
+        ,PROMOTION_FEE
+        ,VISTOR_COUNT
+        ,VIEW_COUNT
+        ,PAY_CONVERSION_RATE
+        ,AMOUNT_PER_BUYER
+        ,PAID_ORDER_COUNT
+        ,PAID_BUYER_COUNT
+        ,REFUND_POST_SALE_WEEK
+        ,STORE_RANK
+        ,BOOKING_AMOUNT
+        ,BOOKING_PLUS_AMOUNT
+        ,NEW_RETAIL_AMOUNT
+        ,SALE_REMARK
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.shopName,jdbcType=VARCHAR}
+            ,#{item.saleDate,jdbcType=VARCHAR}
+            ,#{item.payAmount,jdbcType=VARCHAR}
+            ,#{item.refundWrongAmount,jdbcType=VARCHAR}
+            ,#{item.noneSaleAmount,jdbcType=VARCHAR}
+            ,#{item.realSaleAmount,jdbcType=VARCHAR}
+            ,#{item.promotionFee,jdbcType=VARCHAR}
+            ,#{item.vistorCount,jdbcType=VARCHAR}
+            ,#{item.viewCount,jdbcType=VARCHAR}
+            ,#{item.payConversionRate,jdbcType=VARCHAR}
+            ,#{item.amountPerBuyer,jdbcType=VARCHAR}
+            ,#{item.paidOrderCount,jdbcType=VARCHAR}
+            ,#{item.paidBuyerCount,jdbcType=VARCHAR}
+            ,#{item.refundPostSaleWeek,jdbcType=VARCHAR}
+            ,#{item.storeRank,jdbcType=VARCHAR}
+            ,#{item.bookingAmount,jdbcType=VARCHAR}
+            ,#{item.bookingPlusAmount,jdbcType=VARCHAR}
+            ,#{item.newRetailAmount,jdbcType=VARCHAR}
+            ,#{item.saleRemark,jdbcType=VARCHAR}
+            ,#{item.createdBy,jdbcType=VARCHAR}
+            ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+            ,#{item.rowNumber,jdbcType=INTEGER}
+            ,#{item.taskId,jdbcType=VARCHAR}
+            ,#{item.reportDate,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+
+    </insert>
+
+    <delete id="deleteByTaskId">
+
+        delete  from IMPORT_S_SALE_DATA_T where
+        SALE_DATE <![CDATA[ >= ]]>
+        (
+        select to_date(MIN(SALE_DATE),'yyyyMMdd') from IMPORT_S_SALE_DATA_TMP_T where TASK_ID = #{taskId})
+        AND
+        SALE_DATE <![CDATA[ <= ]]>
+        (
+        select to_date(MAX(SALE_DATE),'yyyyMMdd') from IMPORT_S_SALE_DATA_TMP_T where TASK_ID = #{taskId})
+
+    </delete>
+
+    <delete id="deleteByTaskIdAndShopName">
+        delete  from IMPORT_S_SALE_DATA_T where 1 = 1
+        AND SHOP_NAME = #{shopName}
+        AND SALE_DATE =
+        (
+              select to_date(SALE_DATE,'yyyyMMdd') from IMPORT_S_SALE_DATA_TMP_T
+              where TASK_ID = #{taskId} and rownum =1
+        )
+    </delete>
+
+    <insert id="cloneFromTempTByShop">
+    insert into IMPORT_S_SALE_DATA_T (
+    SHOP_NAME
+    ,SALE_DATE
+    ,PAY_AMOUNT
+    ,REFUND_WRONG_AMOUNT
+    ,REAL_SALE_AMOUNT
+    ,PROMOTION_FEE
+    ,VISTOR_COUNT
+    ,VIEW_COUNT
+    ,PAY_CONVERSION_RATE
+    ,PAID_ORDER_COUNT
+    ,PAID_BUYER_COUNT
+    ,REFUND_POST_SALE_WEEK
+    ,STORE_RANK
+    ,BOOKING_AMOUNT
+    ,BOOKING_PLUS_AMOUNT
+    ,NEW_RETAIL_AMOUNT
+    ,SALE_REMARK
+    ,CREATED_BY
+    ,LAST_UPDATED_BY
+    ,AMOUNT_PER_BUYER
+    ,NONE_SALE_AMOUNT
+) select
+    SHOP_NAME
+    ,to_date(SALE_DATE,'yyyyMMdd')
+    ,PAY_AMOUNT
+    ,REFUND_WRONG_AMOUNT
+    ,REAL_SALE_AMOUNT
+    ,PROMOTION_FEE
+    ,VISTOR_COUNT
+    ,VIEW_COUNT
+    ,PAY_CONVERSION_RATE
+    ,PAID_ORDER_COUNT
+    ,PAID_BUYER_COUNT
+    ,REFUND_POST_SALE_WEEK
+    ,STORE_RANK
+    ,BOOKING_AMOUNT
+    ,BOOKING_PLUS_AMOUNT
+    ,NEW_RETAIL_AMOUNT
+    ,SALE_REMARK
+    ,CREATED_BY
+    ,LAST_UPDATED_BY
+    ,AMOUNT_PER_BUYER
+    ,NONE_SALE_AMOUNT
+    from IMPORT_S_SALE_DATA_TMP_T where TASK_ID = #{taskId} and SHOP_NAME = #{shopName}
+    </insert>
+
+    <insert id="cloneFromTempT">
+    insert into IMPORT_S_SALE_DATA_T (
+    SHOP_NAME
+    ,SALE_DATE
+    ,PAY_AMOUNT
+    ,REFUND_WRONG_AMOUNT
+    ,REAL_SALE_AMOUNT
+    ,PROMOTION_FEE
+    ,VISTOR_COUNT
+    ,VIEW_COUNT
+    ,PAY_CONVERSION_RATE
+    ,PAID_ORDER_COUNT
+    ,PAID_BUYER_COUNT
+    ,REFUND_POST_SALE_WEEK
+    ,STORE_RANK
+    ,BOOKING_AMOUNT
+    ,BOOKING_PLUS_AMOUNT
+    ,NEW_RETAIL_AMOUNT
+    ,SALE_REMARK
+    ,CREATED_BY
+    ,LAST_UPDATED_BY
+    ,AMOUNT_PER_BUYER
+    ,NONE_SALE_AMOUNT
+) select
+    SHOP_NAME
+    ,to_date(SALE_DATE,'yyyyMMdd')
+    ,PAY_AMOUNT
+    ,REFUND_WRONG_AMOUNT
+    ,REAL_SALE_AMOUNT
+    ,PROMOTION_FEE
+    ,VISTOR_COUNT
+    ,VIEW_COUNT
+    ,PAY_CONVERSION_RATE
+    ,PAID_ORDER_COUNT
+    ,PAID_BUYER_COUNT
+    ,REFUND_POST_SALE_WEEK
+    ,STORE_RANK
+    ,BOOKING_AMOUNT
+    ,BOOKING_PLUS_AMOUNT
+    ,NEW_RETAIL_AMOUNT
+    ,SALE_REMARK
+    ,CREATED_BY
+    ,LAST_UPDATED_BY
+    ,AMOUNT_PER_BUYER
+    ,NONE_SALE_AMOUNT
+    from IMPORT_S_SALE_DATA_TMP_T where TASK_ID = #{taskId}
+    </insert>
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID
+        ,SHOP_NAME
+        ,SALE_DATE
+        ,PAY_AMOUNT
+        ,REFUND_WRONG_AMOUNT
+        ,NONE_SALE_AMOUNT
+        ,REAL_SALE_AMOUNT
+        ,PROMOTION_FEE
+        ,VISTOR_COUNT
+        ,VIEW_COUNT
+        ,PAY_CONVERSION_RATE
+        ,AMOUNT_PER_BUYER
+        ,PAID_ORDER_COUNT
+        ,PAID_BUYER_COUNT
+        ,REFUND_POST_SALE_WEEK
+        ,STORE_RANK
+        ,BOOKING_AMOUNT
+        ,BOOKING_PLUS_AMOUNT
+        ,NEW_RETAIL_AMOUNT
+        ,SALE_REMARK
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        from IMPORT_S_SALE_DATA_TMP_T
+        where  TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+
+    </select>
+
+    <update id="updateValidStatusByDataIds" >
+        update IMPORT_S_SALE_DATA_TMP_T set VALID_STATUS = #{validStatusCode} where DATA_ID in
+
+        <foreach item="item"  index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_SALE_DATA_TMP_T where VALID_STATUS != 1 and TASK_ID = #{taskId}
+    </select>
+
+    <!-- 查询 -->
+    <select id="search" resultMap="BaseResultMap">
+
+        select
+        A.*
+        from (
+        SELECT T.*, rownum rn FROM (select * from IMPORT_S_SALE_DATA_T order by SALE_DATE desc ,SHOP_NAME asc ) T
+        WHERE 1=1
+        <include refid="searchWhereSql"/>
+        ) A
+        WHERE
+        rn BETWEEN #{startRow}
+        AND #{endRow}
+        <include refid="searchWhereSql"/>
+
+    </select>
+
+    <select id="querySearchTotal" resultType="integer">
+        select count(1) from IMPORT_S_SALE_DATA_T WHERE 1=1
+        <include refid="searchWhereSql"/>
+    </select>
+
+    <sql id="searchWhereSql">
+
+        <if test="searchParam.startDate !=null">
+            <![CDATA[
+            and SALE_DATE >=#{searchParam.startDate}
+            ]]>
+        </if>
+
+        <if test="searchParam.endDate !=null">
+            <![CDATA[
+            and SALE_DATE <=#{searchParam.endDate}
+            ]]>
+        </if>
+
+        <if test="searchParam.shopName != null and searchParam.shopName.size>0">
+            and SHOP_NAME =
+            <foreach item="item"  index="index" collection="searchParam.shopName" open="" separator="" close="">
+                #{item}
+            </foreach>
+        </if>
+    </sql>
+
+</mapper>

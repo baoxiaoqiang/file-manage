@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.ICdsWardrobeTiDao">
+
+    <insert id="cloneFromTempT" statementType="CALLABLE">
+        {call ioccds.bl_cds_import_pkg.import_component_p(#{taskId,mode=IN,jdbcType=VARCHAR},1)}
+    </insert>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO import_cds_wardrobe_component_ti
+        (component_type_code,
+        component_name,
+        component_model,
+        ROW_NUMBER,
+        TASK_ID,
+        CREATED_BY,
+        LAST_UPDATED_BY)
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.factoryCode,jdbcType=VARCHAR},
+            #{item.componentName,jdbcType=VARCHAR},
+            #{item.componentModel,jdbcType=VARCHAR},
+            #{item.rowNumber,jdbcType=INTEGER},
+            #{item.taskId,jdbcType=VARCHAR},
+            #{item.createdBy,jdbcType=INTEGER},
+            #{item.lastUpdatedBy,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID,
+        component_type_code,
+        component_name,
+        component_model,
+        ROW_NUMBER ,
+        TASK_ID
+        from import_cds_wardrobe_component_ti
+        where TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+    </select>
+
+    <update id="updateValidStatusByDataIds">
+        update import_cds_wardrobe_component_ti set VALID_STATUS = #{validStatusCode} where DATA_ID in
+        <foreach item="item" index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from import_cds_wardrobe_component_ti where TASK_ID = #{taskId} and VALID_STATUS != 1
+    </select>
+</mapper>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IServiceBellwetherJDImportDao">
+
+    <resultMap id="BaseResultMap" type="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.ServiceBellwetherJDBean">
+        <id column="DATA_ID" jdbcType="VARCHAR" property="dataId" />
+        <result column="TOTAL_GRADE" jdbcType="NUMERIC" property="totalGrade" />
+        <result column="AFTER_SALE_SERVICE" jdbcType="NUMERIC" property="afterSaleService" />
+        <result column="LOGISTICS_IMPLEMENTATION" jdbcType="NUMERIC" property="logisticsImplementation" />
+        <result column="CUSTOMER_EVALUATE" jdbcType="NUMERIC" property="customerEvaluate" />
+        <result column="CUSTOMER_SERVICE_COUNSELLING" jdbcType="NUMERIC" property="customerServiceCounselling" />
+        <result column="TRANSACTIONS_COMPLAINT" jdbcType="NUMERIC" property="transactionsComplaint" />
+        <result column="EXCEED_TRADE" jdbcType="NUMERIC" property="exceedTrade" />
+        <result column="COMPARE_YESTERDAY" jdbcType="NUMERIC" property="compareYesterday" />
+        <result column="CREATION_DATE" jdbcType="TIMESTAMP" property="creationDate" />
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy" />
+        <result column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" property="lastUpdateDate" />
+        <result column="LAST_UPDATED_BY" jdbcType="VARCHAR" property="lastUpdatedBy" />
+        <result column="REPORT_DATE" jdbcType="TIMESTAMP" property="reportDate" />
+    </resultMap>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_SERVICE_BELLWEATHER_JD_TMP_T
+        (
+        TOTAL_GRADE
+        ,AFTER_SALE_SERVICE
+        ,LOGISTICS_IMPLEMENTATION
+        ,CUSTOMER_EVALUATE
+        ,CUSTOMER_SERVICE_COUNSELLING
+        ,TRANSACTIONS_COMPLAINT
+        ,EXCEED_TRADE
+        ,COMPARE_YESTERDAY
+
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.totalGrade,jdbcType=VARCHAR}
+            ,#{item.afterSaleService,jdbcType=VARCHAR}
+            ,#{item.logisticsImplementation,jdbcType=VARCHAR}
+            ,#{item.customerEvaluate,jdbcType=VARCHAR}
+            ,#{item.customerServiceCounselling,jdbcType=VARCHAR}
+            ,#{item.transactionsComplaint,jdbcType=VARCHAR}
+            ,#{item.exceedTrade,jdbcType=VARCHAR}
+            ,#{item.compareYesterday,jdbcType=VARCHAR}
+
+            ,#{item.createdBy,jdbcType=VARCHAR}
+            ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+            ,#{item.rowNumber,jdbcType=INTEGER}
+            ,#{item.taskId,jdbcType=VARCHAR}
+            ,#{item.reportDate,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+
+    </insert>
+
+
+    <insert id="cloneFromTempT">
+    insert into IMPORT_S_SERVICE_BELLWEATHER_JD_T (
+        TOTAL_GRADE
+        ,AFTER_SALE_SERVICE
+        ,LOGISTICS_IMPLEMENTATION
+        ,CUSTOMER_EVALUATE
+        ,CUSTOMER_SERVICE_COUNSELLING
+        ,TRANSACTIONS_COMPLAINT
+        ,EXCEED_TRADE
+        ,COMPARE_YESTERDAY
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,REPORT_DATE
+
+
+)   select
+        TOTAL_GRADE
+        ,AFTER_SALE_SERVICE
+        ,LOGISTICS_IMPLEMENTATION
+        ,CUSTOMER_EVALUATE
+        ,CUSTOMER_SERVICE_COUNSELLING
+        ,TRANSACTIONS_COMPLAINT
+        ,EXCEED_TRADE
+        ,COMPARE_YESTERDAY
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,to_date(REPORT_DATE,'yyyy-MM-dd')
+        from IMPORT_S_SERVICE_BELLWEATHER_JD_TMP_T where TASK_ID = #{taskId}
+    </insert>
+    <delete id="deleteByTaskId">
+
+        delete  from IMPORT_S_SERVICE_BELLWEATHER_JD_T where REPORT_DATE =
+        (
+        select to_date(REPORT_DATE,'yyyy-MM-dd') from IMPORT_S_SERVICE_BELLWEATHER_JD_TMP_T where TASK_ID = #{taskId}and rownum=1)
+
+    </delete>
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID
+        ,TOTAL_GRADE
+        ,AFTER_SALE_SERVICE
+        ,LOGISTICS_IMPLEMENTATION
+        ,CUSTOMER_EVALUATE
+        ,CUSTOMER_SERVICE_COUNSELLING
+        ,TRANSACTIONS_COMPLAINT
+        ,EXCEED_TRADE
+        ,COMPARE_YESTERDAY
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+
+
+        from IMPORT_S_SERVICE_BELLWEATHER_JD_TMP_T
+
+        where  TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+
+    </select>
+
+    <update id="updateValidStatusByDataIds" >
+        update IMPORT_S_SERVICE_BELLWEATHER_JD_TMP_T set VALID_STATUS = #{validStatusCode} where DATA_ID in
+
+        <foreach item="item"  index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_SERVICE_BELLWEATHER_JD_TMP_T where VALID_STATUS != 1 and TASK_ID = #{taskId}
+    </select>
+
+    <!-- 查询 -->
+    <select id="search" resultMap="BaseResultMap">
+
+        select
+        A.*
+        from (
+        SELECT T.*, rownum rn FROM (select * from IMPORT_S_SERVICE_BELLWEATHER_JD_T order by REPORT_DATE DESC ) T
+        WHERE 1=1
+        <include refid="searchWhereSql"/>
+        ) A
+        WHERE
+        rn BETWEEN #{startRow}
+        AND #{endRow}
+        <include refid="searchWhereSql"/>
+
+    </select>
+
+    <select id="querySearchTotal" resultType="integer">
+        select count(1) from IMPORT_S_SERVICE_BELLWEATHER_JD_T WHERE 1=1
+        <include refid="searchWhereSql"/>
+    </select>
+
+    <sql id="searchWhereSql">
+        <if test="searchParam.startDate !=null">
+            <![CDATA[
+            and REPORT_DATE >=#{searchParam.startDate}
+            ]]>
+        </if>
+
+        <if test="searchParam.endDate !=null">
+            <![CDATA[
+            and REPORT_DATE <=#{searchParam.endDate}
+            ]]>
+        </if>
+    </sql>
+
+</mapper>

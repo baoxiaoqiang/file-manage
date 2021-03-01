@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.INewProductBatchModifyDao">
+
+    <!-- 使用存储过程-->
+    <insert id="cloneFromTempT" statementType="CALLABLE">
+        {call iocemall.emall_new_product_imp_pkg.update_node_status(#{taskId,mode=IN,jdbcType=VARCHAR})}
+    </insert>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_PUTAWAY_TI(
+            SPU_CODE,
+            CREATED_BY,
+            LAST_UPDATED_BY,
+            ROW_NUMBER,
+            TASK_ID,
+            FACTORY_CODE,
+            PRODUCT_SHOOT_DATE,
+            PHOTO_BATCH_DATE_CODE
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+                select
+                    #{item.spuCode,jdbcType=VARCHAR},
+                    #{item.createdBy,jdbcType=VARCHAR},
+                    #{item.lastUpdatedBy,jdbcType=VARCHAR},
+                    #{item.rowNumber,jdbcType=INTEGER},
+                    #{item.taskId,jdbcType=VARCHAR},
+                    #{item.factoryCode,jdbcType=VARCHAR},
+                    #{item.productShootDate,jdbcType=VARCHAR},
+                    #{item.photoBatchDateCode,jdbcType=VARCHAR}
+                from dual
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryByTaskId" resultType="map">
+        select a.DATA_ID,
+            trim(a.spu_code) as spu_code,
+            trim(a.FACTORY_CODE) as FACTORY_CODE,
+            a.ROW_NUMBER,
+            trim(a.product_shoot_date) as product_shoot_date,
+            trim(a.photo_batch_date_code) as photo_batch_date_code,
+            a.TASK_ID,
+            b.task_code
+        from IMPORT_S_PUTAWAY_TI a
+        LEFT JOIN iocemall.emall_re_process_task_t b
+        ON a.factory_code=b.task_id
+        where a.TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND a.VALID_STATUS = #{validStatus}
+        </if>
+    </select>
+
+    <update id="updateValidStatusByDataIds">
+        update IMPORT_S_PUTAWAY_TI set VALID_STATUS = #{validStatusCode} where DATA_ID in
+        <foreach item="item" index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_PUTAWAY_TI where TASK_ID = #{taskId} and VALID_STATUS != 1
+    </select>
+    
+    <select id="queryNodeStatus" resultType="cn.com.quanyou.ioc.file.manage.vo.NewNodeStatusVo">
+        SELECT erwtt.task_status        AS taskStatus,
+               np.spu_code              AS spuCode,
+               pr.photo_batch_date_code AS photoBatchCode
+          FROM emall_ru_work_task_t erwtt
+         INNER JOIN emall_new_product_t np
+            ON erwtt.work_id = np.data_id
+         INNER JOIN emall_photo_record_t pr
+            ON erwtt.photo_record_id = pr.data_id
+         WHERE erwtt.task_id = #{nodeId}
+           AND np.on_shelf_status = 0
+    </select>
+</mapper>

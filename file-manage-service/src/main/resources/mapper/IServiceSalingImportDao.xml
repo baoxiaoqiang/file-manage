@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IServiceSalingImportDao">
+    <resultMap id="BaseResultMap" type="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.ServiceSalingBean">
+        <id column="DATA_ID" jdbcType="VARCHAR" property="dataId" />
+        <result column="SALE_DATE" jdbcType="TIMESTAMP" property="saleDate" />
+        <result column="SHOP_NAME" jdbcType="VARCHAR" property="shopName" />
+        <result column="USER_NAME" jdbcType="VARCHAR" property="userName" />
+        <result column="COUNSELLING_USER_NUM" jdbcType="NUMERIC" property="counsellingUserNum" />
+        <result column="RECEPTION_USER_NUM" jdbcType="NUMERIC" property="receptionUserNum" />
+        <result column="RECEPTION_DIRECT_USER_NUM" jdbcType="NUMERIC" property="receptionDirectUserNum" />
+        <result column="CHANGE_INTO_USER_NUM" jdbcType="NUMERIC" property="changeIntoUserNum" />
+        <result column="CHANGE_OUT_USER_NUM" jdbcType="NUMERIC" property="changeOutUserNum" />
+        <result column="BUYER_LAUNCH" jdbcType="NUMERIC" property="buyerLaunch" />
+        <result column="CUSTOMER_SERVICE_FOLLOW" jdbcType="NUMERIC" property="customerServiceFollow" />
+        <result column="MESSAGE_TOTAL" jdbcType="NUMERIC" property="messageTotal" />
+        <result column="MESSAGE_NUM_BUYER" jdbcType="NUMERIC" property="messageNumBuyer" />
+        <result column="MESSAGE_NUM_CUSTOMER_SERVICE" jdbcType="NUMERIC" property="messageNumCustomerService" />
+        <result column="COMPARE_ASK_ANSWER" jdbcType="NUMERIC" property="compareAskAnswer" />
+        <result column="WORD_NUM_CUSTOMER_SERVICE" jdbcType="NUMERIC" property="wordNumCustomerService" />
+        <result column="MAX_RECEPTION_NUM_CONCURRENTLY" jdbcType="NUMERIC" property="maxReceptionNumConcurrently" />
+        <result column="NUM_NOT_REPLY" jdbcType="NUMERIC" property="numNotReply" />
+        <result column="REPLY_RATE_WANGWANG" jdbcType="NUMERIC" property="replyRateWangwang" />
+        <result column="NUM_RESPONSE_SLOWLY" jdbcType="NUMERIC" property="numResponseSlowly" />
+        <result column="NUM_RECEPTION_LONG_TIME" jdbcType="NUMERIC" property="numReceptionLongTime" />
+        <result column="TIMES_RESPONSE_FIRST_TIME" jdbcType="NUMERIC" property="timesResponseFirstTime" />
+        <result column="TIMES_RESPONSE_AVERAGE" jdbcType="NUMERIC" property="timesResponseAverage" />
+        <result column="TIMES_RECEPTION_AVERAGE" jdbcType="NUMERIC" property="timesReceptionAverage" />
+        <result column="EVALUATE_NUM_SEND_OUT" jdbcType="NUMERIC" property="evaluateNumSendOut" />
+        <result column="EVALUATE_NUM_RECEIVED" jdbcType="NUMERIC" property="evaluateNumReceived" />
+        <result column="RATE_VERY_SATISFIED" jdbcType="NUMERIC" property="rateVerySatisfied" />
+        <result column="RATE_SATISFIED" jdbcType="NUMERIC" property="rateSatisfied" />
+        <result column="RATE_NORMAL" jdbcType="NUMERIC" property="rateNormal" />
+        <result column="RATE_DISSATISFIED" jdbcType="NUMERIC" property="rateDissatisfied" />
+        <result column="RATE_DISSATISFIED_VERY" jdbcType="NUMERIC" property="rateDissatisfiedVery" />
+        <result column="RATE_EVALUATE_SEND" jdbcType="NUMERIC" property="rateEvaluateSend" />
+        <result column="RATE_EVALUATE_RETURN" jdbcType="NUMERIC" property="rateEvaluateReturn" />
+        <result column="RATE_CUSTOMER_SATISFIED" jdbcType="NUMERIC" property="rateCustomerSatisfied" />
+        <result column="RATE_CUSTOMER_SERVICE_SATISFIED" jdbcType="NUMERIC" property="rateCustomerServiceSatisfied" />
+        <result column="CREATION_DATE" jdbcType="TIMESTAMP" property="creationDate" />
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy" />
+        <result column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" property="lastUpdateDate" />
+        <result column="LAST_UPDATED_BY" jdbcType="VARCHAR" property="lastUpdatedBy" />
+    </resultMap>
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_SERVICE_SALING_TMP_T
+        (
+        SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,RECEPTION_DIRECT_USER_NUM
+        ,CHANGE_INTO_USER_NUM
+        ,CHANGE_OUT_USER_NUM
+        ,BUYER_LAUNCH
+        ,CUSTOMER_SERVICE_FOLLOW
+        ,MESSAGE_TOTAL
+        ,MESSAGE_NUM_BUYER
+        ,MESSAGE_NUM_CUSTOMER_SERVICE
+        ,COMPARE_ASK_ANSWER
+        ,WORD_NUM_CUSTOMER_SERVICE
+        ,MAX_RECEPTION_NUM_CONCURRENTLY
+        ,NUM_NOT_REPLY
+        ,REPLY_RATE_WANGWANG
+        ,NUM_RESPONSE_SLOWLY
+        ,NUM_RECEPTION_LONG_TIME
+        ,TIMES_RESPONSE_FIRST_TIME
+        ,TIMES_RESPONSE_AVERAGE
+        ,TIMES_RECEPTION_AVERAGE
+        ,EVALUATE_NUM_SEND_OUT
+        ,EVALUATE_NUM_RECEIVED
+        ,RATE_VERY_SATISFIED
+        ,RATE_SATISFIED
+        ,RATE_NORMAL
+        ,RATE_DISSATISFIED
+        ,RATE_DISSATISFIED_VERY
+        ,RATE_EVALUATE_SEND
+        ,RATE_EVALUATE_RETURN
+        ,RATE_CUSTOMER_SATISFIED
+        ,RATE_CUSTOMER_SERVICE_SATISFIED
+
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.saleDate,jdbcType=VARCHAR}
+            ,#{item.shopName,jdbcType=VARCHAR}
+            ,#{item.userName,jdbcType=VARCHAR}
+            ,#{item.counsellingUserNum,jdbcType=VARCHAR}
+            ,#{item.receptionUserNum,jdbcType=VARCHAR}
+            ,#{item.receptionDirectUserNum,jdbcType=VARCHAR}
+            ,#{item.changeIntoUserNum,jdbcType=VARCHAR}
+            ,#{item.changeOutUserNum,jdbcType=VARCHAR}
+            ,#{item.buyerLaunch,jdbcType=VARCHAR}
+            ,#{item.customerServiceFollow,jdbcType=VARCHAR}
+            ,#{item.messageTotal,jdbcType=VARCHAR}
+            ,#{item.messageNumBuyer,jdbcType=VARCHAR}
+            ,#{item.messageNumCustomerService,jdbcType=VARCHAR}
+            ,#{item.compareAskAnswer,jdbcType=VARCHAR}
+            ,#{item.wordNumCustomerService,jdbcType=VARCHAR}
+            ,#{item.maxReceptionNumConcurrently,jdbcType=VARCHAR}
+            ,#{item.numNotReply,jdbcType=VARCHAR}
+            ,#{item.replyRateWangwang,jdbcType=VARCHAR}
+            ,#{item.numResponseSlowly,jdbcType=VARCHAR}
+            ,#{item.numReceptionLongTime,jdbcType=VARCHAR}
+            ,#{item.timesResponseFirstTime,jdbcType=VARCHAR}
+            ,#{item.timesResponseAverage,jdbcType=VARCHAR}
+            ,#{item.timesReceptionAverage,jdbcType=VARCHAR}
+            ,#{item.evaluateNumSendOut,jdbcType=VARCHAR}
+            ,#{item.evaluateNumReceived,jdbcType=VARCHAR}
+            ,#{item.rateVerySatisfied,jdbcType=VARCHAR}
+            ,#{item.rateSatisfied,jdbcType=VARCHAR}
+            ,#{item.rateNormal,jdbcType=VARCHAR}
+            ,#{item.rateDissatisfied,jdbcType=VARCHAR}
+            ,#{item.rateDissatisfiedVery,jdbcType=VARCHAR}
+            ,#{item.rateEvaluateSend,jdbcType=VARCHAR}
+            ,#{item.rateEvaluateReturn,jdbcType=VARCHAR}
+            ,#{item.rateCustomerSatisfied,jdbcType=VARCHAR}
+            ,#{item.rateCustomerServiceSatisfied,jdbcType=VARCHAR}
+
+            ,#{item.createdBy,jdbcType=VARCHAR}
+            ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+            ,#{item.rowNumber,jdbcType=INTEGER}
+            ,#{item.taskId,jdbcType=VARCHAR}
+            ,#{item.reportDate,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+
+    </insert>
+
+    <insert id="cloneFromTempT">
+    insert into IMPORT_S_SERVICE_SALING_T (
+        SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,RECEPTION_DIRECT_USER_NUM
+        ,CHANGE_INTO_USER_NUM
+        ,CHANGE_OUT_USER_NUM
+        ,BUYER_LAUNCH
+        ,CUSTOMER_SERVICE_FOLLOW
+        ,MESSAGE_TOTAL
+        ,MESSAGE_NUM_BUYER
+        ,MESSAGE_NUM_CUSTOMER_SERVICE
+        ,COMPARE_ASK_ANSWER
+        ,WORD_NUM_CUSTOMER_SERVICE
+        ,MAX_RECEPTION_NUM_CONCURRENTLY
+        ,NUM_NOT_REPLY
+        ,REPLY_RATE_WANGWANG
+        ,NUM_RESPONSE_SLOWLY
+        ,NUM_RECEPTION_LONG_TIME
+        ,TIMES_RESPONSE_FIRST_TIME
+        ,TIMES_RESPONSE_AVERAGE
+        ,TIMES_RECEPTION_AVERAGE
+        ,EVALUATE_NUM_SEND_OUT
+        ,EVALUATE_NUM_RECEIVED
+        ,RATE_VERY_SATISFIED
+        ,RATE_SATISFIED
+        ,RATE_NORMAL
+        ,RATE_DISSATISFIED
+        ,RATE_DISSATISFIED_VERY
+        ,RATE_EVALUATE_SEND
+        ,RATE_EVALUATE_RETURN
+        ,RATE_CUSTOMER_SATISFIED
+        ,RATE_CUSTOMER_SERVICE_SATISFIED
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+)   select
+        to_date(SALE_DATE,'yyyyMMdd')
+        ,SHOP_NAME
+        ,USER_NAME
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,RECEPTION_DIRECT_USER_NUM
+        ,CHANGE_INTO_USER_NUM
+        ,CHANGE_OUT_USER_NUM
+        ,BUYER_LAUNCH
+        ,CUSTOMER_SERVICE_FOLLOW
+        ,MESSAGE_TOTAL
+        ,MESSAGE_NUM_BUYER
+        ,MESSAGE_NUM_CUSTOMER_SERVICE
+        ,COMPARE_ASK_ANSWER
+        ,WORD_NUM_CUSTOMER_SERVICE
+        ,MAX_RECEPTION_NUM_CONCURRENTLY
+        ,NUM_NOT_REPLY
+        ,REPLY_RATE_WANGWANG
+        ,NUM_RESPONSE_SLOWLY
+        ,NUM_RECEPTION_LONG_TIME
+        ,TIMES_RESPONSE_FIRST_TIME
+        ,TIMES_RESPONSE_AVERAGE
+        ,TIMES_RECEPTION_AVERAGE
+        ,EVALUATE_NUM_SEND_OUT
+        ,EVALUATE_NUM_RECEIVED
+        ,RATE_VERY_SATISFIED
+        ,RATE_SATISFIED
+        ,RATE_NORMAL
+        ,RATE_DISSATISFIED
+        ,RATE_DISSATISFIED_VERY
+        ,RATE_EVALUATE_SEND
+        ,RATE_EVALUATE_RETURN
+        ,RATE_CUSTOMER_SATISFIED
+        ,RATE_CUSTOMER_SERVICE_SATISFIED
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        from IMPORT_S_SERVICE_SALING_TMP_T where TASK_ID = #{taskId}
+    </insert>
+    <insert id="cloneFromTempTByShop">
+    insert into IMPORT_S_SERVICE_SALING_T (
+        SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,RECEPTION_DIRECT_USER_NUM
+        ,CHANGE_INTO_USER_NUM
+        ,CHANGE_OUT_USER_NUM
+        ,BUYER_LAUNCH
+        ,CUSTOMER_SERVICE_FOLLOW
+        ,MESSAGE_TOTAL
+        ,MESSAGE_NUM_BUYER
+        ,MESSAGE_NUM_CUSTOMER_SERVICE
+        ,COMPARE_ASK_ANSWER
+        ,WORD_NUM_CUSTOMER_SERVICE
+        ,MAX_RECEPTION_NUM_CONCURRENTLY
+        ,NUM_NOT_REPLY
+        ,REPLY_RATE_WANGWANG
+        ,NUM_RESPONSE_SLOWLY
+        ,NUM_RECEPTION_LONG_TIME
+        ,TIMES_RESPONSE_FIRST_TIME
+        ,TIMES_RESPONSE_AVERAGE
+        ,TIMES_RECEPTION_AVERAGE
+        ,EVALUATE_NUM_SEND_OUT
+        ,EVALUATE_NUM_RECEIVED
+        ,RATE_VERY_SATISFIED
+        ,RATE_SATISFIED
+        ,RATE_NORMAL
+        ,RATE_DISSATISFIED
+        ,RATE_DISSATISFIED_VERY
+        ,RATE_EVALUATE_SEND
+        ,RATE_EVALUATE_RETURN
+        ,RATE_CUSTOMER_SATISFIED
+        ,RATE_CUSTOMER_SERVICE_SATISFIED
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+)   select
+        to_date(SALE_DATE,'yyyyMMdd')
+        ,SHOP_NAME
+        ,USER_NAME
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,RECEPTION_DIRECT_USER_NUM
+        ,CHANGE_INTO_USER_NUM
+        ,CHANGE_OUT_USER_NUM
+        ,BUYER_LAUNCH
+        ,CUSTOMER_SERVICE_FOLLOW
+        ,MESSAGE_TOTAL
+        ,MESSAGE_NUM_BUYER
+        ,MESSAGE_NUM_CUSTOMER_SERVICE
+        ,COMPARE_ASK_ANSWER
+        ,WORD_NUM_CUSTOMER_SERVICE
+        ,MAX_RECEPTION_NUM_CONCURRENTLY
+        ,NUM_NOT_REPLY
+        ,REPLY_RATE_WANGWANG
+        ,NUM_RESPONSE_SLOWLY
+        ,NUM_RECEPTION_LONG_TIME
+        ,TIMES_RESPONSE_FIRST_TIME
+        ,TIMES_RESPONSE_AVERAGE
+        ,TIMES_RECEPTION_AVERAGE
+        ,EVALUATE_NUM_SEND_OUT
+        ,EVALUATE_NUM_RECEIVED
+        ,RATE_VERY_SATISFIED
+        ,RATE_SATISFIED
+        ,RATE_NORMAL
+        ,RATE_DISSATISFIED
+        ,RATE_DISSATISFIED_VERY
+        ,RATE_EVALUATE_SEND
+        ,RATE_EVALUATE_RETURN
+        ,RATE_CUSTOMER_SATISFIED
+        ,RATE_CUSTOMER_SERVICE_SATISFIED
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        from IMPORT_S_SERVICE_SALING_TMP_T where TASK_ID = #{taskId} and SHOP_NAME = #{shopName}
+    </insert>
+    <delete id="deleteByTaskId">
+
+        delete  from IMPORT_S_SERVICE_SALING_T where SALE_DATE =
+        (
+        select to_date(SALE_DATE,'yyyyMMdd') from IMPORT_S_SERVICE_SALING_TMP_T where TASK_ID = #{taskId} and rownum = 1)
+
+    </delete>
+
+    <delete id="deleteByTaskIdAndShopName">
+
+        delete  from IMPORT_S_SERVICE_SALING_T where 1 = 1
+        AND SHOP_NAME = #{shopName}
+        AND SALE_DATE =
+        (
+        select to_date(SALE_DATE,'yyyyMMdd') from IMPORT_S_SERVICE_SALING_TMP_T where TASK_ID = #{taskId} and rownum = 1)
+
+    </delete>
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID
+        ,SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,COUNSELLING_USER_NUM
+        ,RECEPTION_USER_NUM
+        ,RECEPTION_DIRECT_USER_NUM
+        ,CHANGE_INTO_USER_NUM
+        ,CHANGE_OUT_USER_NUM
+        ,BUYER_LAUNCH
+        ,CUSTOMER_SERVICE_FOLLOW
+        ,MESSAGE_TOTAL
+        ,MESSAGE_NUM_BUYER
+        ,MESSAGE_NUM_CUSTOMER_SERVICE
+        ,COMPARE_ASK_ANSWER
+        ,WORD_NUM_CUSTOMER_SERVICE
+        ,MAX_RECEPTION_NUM_CONCURRENTLY
+        ,NUM_NOT_REPLY
+        ,REPLY_RATE_WANGWANG
+        ,NUM_RESPONSE_SLOWLY
+        ,NUM_RECEPTION_LONG_TIME
+        ,TIMES_RESPONSE_FIRST_TIME
+        ,TIMES_RESPONSE_AVERAGE
+        ,TIMES_RECEPTION_AVERAGE
+        ,EVALUATE_NUM_SEND_OUT
+        ,EVALUATE_NUM_RECEIVED
+        ,RATE_VERY_SATISFIED
+        ,RATE_SATISFIED
+        ,RATE_NORMAL
+        ,RATE_DISSATISFIED
+        ,RATE_DISSATISFIED_VERY
+        ,RATE_EVALUATE_SEND
+        ,RATE_EVALUATE_RETURN
+        ,RATE_CUSTOMER_SATISFIED
+        ,RATE_CUSTOMER_SERVICE_SATISFIED
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+
+        from IMPORT_S_SERVICE_SALING_TMP_T
+
+        where  TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+
+    </select>
+
+    <update id="updateValidStatusByDataIds" >
+        update IMPORT_S_SERVICE_SALING_TMP_T set VALID_STATUS = #{validStatusCode} where DATA_ID in
+
+        <foreach item="item"  index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_SERVICE_SALING_TMP_T where VALID_STATUS != 1 and TASK_ID = #{taskId}
+    </select>
+
+    <select id="queryMistakeAndUncheckedCountByShopName" resultType="integer">
+        select count(1) from IMPORT_S_SERVICE_SALING_TMP_T where VALID_STATUS != 1 and TASK_ID = #{taskId} and SHOP_NAME = #{shopName}
+    </select>
+
+    <!-- 查询 -->
+    <select id="search" resultMap="BaseResultMap">
+
+        select
+        A.*
+        from (
+        SELECT T.*, rownum rn FROM (select * from IMPORT_S_SERVICE_SALING_T order by SALE_DATE desc ,SHOP_NAME asc ) T
+        WHERE 1=1
+        <include refid="searchWhereSql"/>
+        ) A
+        WHERE
+        rn BETWEEN #{startRow}
+        AND #{endRow}
+        <include refid="searchWhereSql"/>
+
+    </select>
+
+    <select id="querySearchTotal" resultType="integer">
+        select count(1) from IMPORT_S_SERVICE_SALING_T WHERE 1=1
+        <include refid="searchWhereSql"/>
+    </select>
+
+    <sql id="searchWhereSql">
+        <if test="searchParam.startDate !=null">
+            <![CDATA[
+            and SALE_DATE >=#{searchParam.startDate}
+            ]]>
+        </if>
+
+        <if test="searchParam.endDate !=null">
+            <![CDATA[
+            and SALE_DATE <=#{searchParam.endDate}
+            ]]>
+        </if>
+    </sql>
+
+</mapper>

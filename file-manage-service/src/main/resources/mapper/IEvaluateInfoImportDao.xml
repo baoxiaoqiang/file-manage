@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IEvaluateInfoImportDao">
+
+    <insert id="cloneFromTempT">
+    insert into IMPORT_S_EVALUATE_INFO_T (
+    SHOP_NAME
+    ,REVIEW_DATE
+    ,EVALUATE_NUM
+    ,CREATED_BY
+    ,LAST_UPDATED_BY
+) select
+    SHOP_NAME
+    ,to_date(REVIEW_DATE,'yyyyMMdd')
+    ,EVALUATE_NUM
+    ,CREATED_BY
+    ,LAST_UPDATED_BY from IMPORT_S_EVALUATE_INFO_TMP_T where TASK_ID = #{taskId}
+    </insert>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_EVALUATE_INFO_TMP_T
+        (
+        SHOP_NAME
+        ,REVIEW_DATE
+        ,EVALUATE_NUM
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.shopName,jdbcType=VARCHAR}
+            ,#{item.reviewDate,jdbcType=VARCHAR}
+            ,#{item.evaluateNum,jdbcType=VARCHAR}
+            ,#{item.createdBy,jdbcType=VARCHAR}
+            ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+            ,#{item.rowNumber,jdbcType=INTEGER}
+            ,#{item.taskId,jdbcType=VARCHAR}
+            ,#{item.reportDate,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+
+    </insert>
+    <delete id="deleteByTaskId">
+
+        delete  from IMPORT_S_EVALUATE_INFO_T where REVIEW_DATE =
+        (
+        select to_date(REVIEW_DATE,'yyyyMMdd') from IMPORT_S_EVALUATE_INFO_TMP_T where TASK_ID = #{taskId}and rownum=1)
+
+    </delete>
+
+    <select id="queryByTaskId" resultType="map">
+        select
+            DATA_ID,
+            SHOP_NAME ,
+            REVIEW_DATE ,
+            EVALUATE_NUM ,
+            ROW_NUMBER  ,
+            TASK_ID,
+            REPORT_DATE
+
+        from IMPORT_S_EVALUATE_INFO_TMP_T
+
+        where  TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+
+    </select>
+
+    <update id="updateValidStatusByDataIds" >
+        update IMPORT_S_EVALUATE_INFO_TMP_T set VALID_STATUS = #{validStatusCode} where DATA_ID in
+
+        <foreach item="item"  index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_EVALUATE_INFO_TMP_T where TASK_ID = #{taskId} and VALID_STATUS != 1
+    </select>
+
+</mapper>

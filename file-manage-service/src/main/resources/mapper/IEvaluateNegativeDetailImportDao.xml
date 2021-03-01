@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IEvaluateNegativeDetailImportDao">
+
+    <resultMap id="BaseResultMap"
+               type="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.EvaluateNegativeDetailBean">
+        <id column="DATA_ID" jdbcType="VARCHAR" property="dataId"/>
+        <result column="EVALUATE_DATE" jdbcType="DATE" property="evaluateDate"/>
+        <result column="ACCEPT_DATE" jdbcType="DATE" property="acceptDate"/>
+        <result column="SHOP_NAME" jdbcType="VARCHAR" property="shopName"/>
+        <result column="NEGATIVE_EVALUATE" jdbcType="VARCHAR" property="negativeEvaluate"/>
+        <result column="CUSTOMER_ID" jdbcType="VARCHAR" property="customerId"/>
+        <result column="FEEDBACK_CONTENT" jdbcType="NVARCHAR" property="feedbackContent"/>
+        <result column="REPLY_CONTENT" jdbcType="NVARCHAR" property="replyContent"/>
+        <result column="SNAME" jdbcType="VARCHAR" property="sname"/>
+        <result column="CUSTOMER_INFO" jdbcType="NVARCHAR" property="customerInfo"/>
+        <result column="EXCLUSIVE_SHOP" jdbcType="VARCHAR" property="exclusiveShop"/>
+        <result column="PRODUCT_TYPE" jdbcType="VARCHAR" property="productType"/>
+        <result column="PRODUCT_MODEL" jdbcType="VARCHAR" property="productModel"/>
+        <result column="PROBLEM_TYPE" jdbcType="VARCHAR" property="problemType"/>
+        <result column="PROBLEM_TYPE_SUBDIVIDE" jdbcType="VARCHAR" property="problemTypeSubdivide"/>
+        <result column="HANDLE_RESULT" jdbcType="VARCHAR" property="handleResult"/>
+        <result column="CUSTOMER_REASON" jdbcType="VARCHAR" property="customerReason"/>
+        <result column="FOLLOW_DATE" jdbcType="NVARCHAR" property="followDate"/>
+        <result column="HANDLE_STATUS" jdbcType="VARCHAR" property="handleStatus"/>
+        <result column="HANDLE_USER" jdbcType="VARCHAR" property="handleUser"/>
+        <result column="CREATION_DATE" jdbcType="DATE" property="creationDate"/>
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="LAST_UPDATE_DATE" jdbcType="DATE" property="lastUpdateDate"/>
+        <result column="LAST_UPDATED_BY" jdbcType="VARCHAR" property="lastUpdatedBy"/>
+    </resultMap>
+
+    <insert id="cloneFromTempT">
+    insert into IMPORT_S_EVALUATE_NEG_DETAIL_T (
+        EVALUATE_DATE
+        ,ACCEPT_DATE
+        ,SHOP_NAME
+        ,NEGATIVE_EVALUATE
+        ,CUSTOMER_ID
+        ,FEEDBACK_CONTENT
+        ,REPLY_CONTENT
+        ,SNAME
+        ,CUSTOMER_INFO
+        ,EXCLUSIVE_SHOP
+        ,PRODUCT_TYPE
+        ,PRODUCT_MODEL
+        ,PROBLEM_TYPE
+        ,PROBLEM_TYPE_SUBDIVIDE
+        ,HANDLE_RESULT
+        ,CUSTOMER_REASON
+        ,FOLLOW_DATE
+        ,HANDLE_STATUS
+        ,HANDLE_USER
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ORDER_NUMBER
+)   select
+        to_date(EVALUATE_DATE,'yyyyMMdd')
+        ,to_date(ACCEPT_DATE,'yyyyMMdd')
+        ,SHOP_NAME
+        ,NEGATIVE_EVALUATE
+        ,CUSTOMER_ID
+        ,FEEDBACK_CONTENT
+        ,REPLY_CONTENT
+        ,SNAME
+        ,CUSTOMER_INFO
+        ,EXCLUSIVE_SHOP
+        ,PRODUCT_TYPE
+        ,PRODUCT_MODEL
+        ,PROBLEM_TYPE
+        ,PROBLEM_TYPE_SUBDIVIDE
+        ,HANDLE_RESULT
+        ,CUSTOMER_REASON
+        ,FOLLOW_DATE
+        ,HANDLE_STATUS
+        ,HANDLE_USER
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ORDER_NUMBER
+        from IMPORT_S_EVALUATE_NEG_DETAIL_TMP_T where TASK_ID = #{taskId}
+    </insert>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_EVALUATE_NEG_DETAIL_TMP_T
+        (
+        EVALUATE_DATE
+        ,ACCEPT_DATE
+        ,ORDER_NUMBER
+        ,SHOP_NAME
+        ,NEGATIVE_EVALUATE
+        ,CUSTOMER_ID
+        ,FEEDBACK_CONTENT
+        ,REPLY_CONTENT
+        ,SNAME
+        ,CUSTOMER_INFO
+        ,EXCLUSIVE_SHOP
+        ,PRODUCT_TYPE
+        ,PRODUCT_MODEL
+        ,PROBLEM_TYPE
+        ,PROBLEM_TYPE_SUBDIVIDE
+        ,HANDLE_RESULT
+        ,CUSTOMER_REASON
+        ,FOLLOW_DATE
+        ,HANDLE_STATUS
+        ,HANDLE_USER
+
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.evaluateDate,jdbcType=VARCHAR}
+            ,#{item.acceptDate,jdbcType=VARCHAR}
+            ,#{item.orderNumber,jdbcType=VARCHAR}
+            ,#{item.shopName,jdbcType=VARCHAR}
+            ,#{item.negativeEvaluate,jdbcType=VARCHAR}
+            ,#{item.customerId,jdbcType=VARCHAR}
+            ,#{item.feedbackContent,jdbcType=VARCHAR}
+            ,#{item.replyContent,jdbcType=VARCHAR}
+            ,#{item.sname,jdbcType=VARCHAR}
+            ,#{item.customerInfo,jdbcType=VARCHAR}
+            ,#{item.exclusiveShop,jdbcType=VARCHAR}
+            ,#{item.productType,jdbcType=VARCHAR}
+            ,#{item.productModel,jdbcType=VARCHAR}
+            ,#{item.problemType,jdbcType=VARCHAR}
+            ,#{item.problemTypeSubdivide,jdbcType=VARCHAR}
+            ,#{item.handleResult,jdbcType=VARCHAR}
+            ,#{item.customerReason,jdbcType=VARCHAR}
+            ,#{item.followDate,jdbcType=VARCHAR}
+            ,#{item.handleStatus,jdbcType=VARCHAR}
+            ,#{item.handleUser,jdbcType=VARCHAR}
+
+            ,#{item.createdBy,jdbcType=VARCHAR}
+            ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+            ,#{item.rowNumber,jdbcType=INTEGER}
+            ,#{item.taskId,jdbcType=VARCHAR}
+            ,#{item.reportDate,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+
+    </insert>
+    <delete id="deleteByTaskId">
+        delete  from IMPORT_S_EVALUATE_NEG_DETAIL_T where EVALUATE_DATE =
+        (
+        select to_date(EVALUATE_DATE,'yyyyMMdd') from IMPORT_S_EVALUATE_NEG_DETAIL_TMP_T where TASK_ID = #{taskId}and rownum=1)
+    </delete>
+
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID
+        ,EVALUATE_DATE
+        ,ACCEPT_DATE
+        ,SHOP_NAME
+        ,ORDER_NUMBER
+        ,NEGATIVE_EVALUATE
+        ,CUSTOMER_ID
+        ,FEEDBACK_CONTENT
+        ,REPLY_CONTENT
+        ,SNAME
+        ,CUSTOMER_INFO
+        ,EXCLUSIVE_SHOP
+        ,PRODUCT_TYPE
+        ,PRODUCT_MODEL
+        ,PROBLEM_TYPE
+        ,PROBLEM_TYPE_SUBDIVIDE
+        ,HANDLE_RESULT
+        ,CUSTOMER_REASON
+        ,FOLLOW_DATE
+        ,HANDLE_STATUS
+        ,HANDLE_USER
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+
+        from IMPORT_S_EVALUATE_NEG_DETAIL_TMP_T
+
+        where TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+
+    </select>
+
+    <update id="updateValidStatusByDataIds">
+        update IMPORT_S_EVALUATE_NEG_DETAIL_TMP_T set VALID_STATUS = #{validStatusCode} where DATA_ID in
+
+        <foreach item="item" index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_EVALUATE_NEG_DETAIL_TMP_T where VALID_STATUS != 1 and TASK_ID = #{taskId}
+    </select>
+
+    <!-- 查询 -->
+    <select id="search" resultMap="BaseResultMap">
+
+        select
+        A.*
+        from (
+        SELECT T.*, rownum rn FROM (select * from IMPORT_S_EVALUATE_NEG_DETAIL_T order by EVALUATE_DATE desc ,SHOP_NAME asc ) T
+        WHERE 1=1
+        <include refid="searchWhereSql"/>
+        ) A
+        WHERE
+        rn BETWEEN #{startRow}
+        AND #{endRow}
+        <include refid="searchWhereSql"/>
+
+    </select>
+
+    <select id="querySearchTotal" resultType="integer">
+        select count(1) from IMPORT_S_EVALUATE_NEG_DETAIL_T WHERE 1=1
+        <include refid="searchWhereSql"/>
+    </select>
+
+    <sql id="searchWhereSql">
+
+        <if test="searchParam.startDate !=null">
+            <![CDATA[
+            and EVALUATE_DATE >=#{searchParam.startDate}
+            ]]>
+        </if>
+
+        <if test="searchParam.endDate !=null">
+            <![CDATA[
+            and EVALUATE_DATE <=#{searchParam.endDate}
+            ]]>
+        </if>
+
+        <if test="searchParam.agency != null and searchParam.agency.size > 0">
+            and SNAME in
+            <foreach item="item" index="index" collection="searchParam.agency" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="searchParam.shopName != null and searchParam.shopName.size>0">
+            and SHOP_NAME in
+            <foreach item="item" index="index" collection="searchParam.shopName" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+
+        </if>
+        <if test="searchParam.productType != null and searchParam.productType.size > 0">
+            and PRODUCT_TYPE in
+            <foreach item="item" index="index" collection="searchParam.productType" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="searchParam.problemType != null and searchParam.problemType.size > 0">
+            and PROBLEM_TYPE in
+            <foreach item="item" index="index" collection="searchParam.problemType" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="searchParam.problemTypeSub != null and searchParam.problemTypeSub.size > 0">
+            and PROBLEM_TYPE_SUBDIVIDE in
+            <foreach item="item" index="index" collection="searchParam.problemTypeSub" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+    </sql>
+
+</mapper>

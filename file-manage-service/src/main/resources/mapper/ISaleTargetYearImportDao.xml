@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.ISaleTargetYearImportDao">
+
+    <resultMap id="BaseResultMap" type="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.SaleTargetYearBean">
+        <id column="DATA_ID" jdbcType="VARCHAR" property="dataId" />
+        <result column="SHOP_NAME" jdbcType="VARCHAR" property="shopName" />
+        <result column="TARGET_YEAR" jdbcType="NUMERIC" property="targetYear" />
+        <result column="TARGET_MONTH" jdbcType="NUMERIC" property="targetMonth" />
+        <result column="TARGET" jdbcType="NUMERIC" property="target" />
+        <result column="CREATION_DATE" jdbcType="TIMESTAMP" property="creationDate" />
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy" />
+        <result column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" property="lastUpdateDate" />
+        <result column="LAST_UPDATED_BY" jdbcType="VARCHAR" property="lastUpdatedBy" />
+        <result column="PLAN_TYPE" jdbcType="VARCHAR" property="planType" />
+        <result column="REPORT_DATE" jdbcType="TIMESTAMP" property="reportDate" />
+    </resultMap>
+
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_SALE_TARGET_TMP_T
+        (
+        SHOP_NAME
+        ,TARGET_YEAR
+        ,TARGET_MONTH
+        ,TARGET
+        ,PLAN_TYPE
+
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.shopName,jdbcType=VARCHAR}
+            ,#{item.targetYear,jdbcType=VARCHAR}
+            ,#{item.targetMonth,jdbcType=VARCHAR}
+            ,#{item.target,jdbcType=VARCHAR}
+            ,'year'
+
+            ,#{item.createdBy,jdbcType=VARCHAR}
+            ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+            ,#{item.rowNumber,jdbcType=INTEGER}
+            ,#{item.taskId,jdbcType=VARCHAR}
+            ,#{item.reportDate,jdbcType=DATE}
+            from dual
+            )
+        </foreach>
+
+    </insert>
+    <insert id="cloneFromTempT">
+    insert into IMPORT_S_SALE_TARGET_T (
+        SHOP_NAME
+        ,TARGET_YEAR
+        ,TARGET_MONTH
+        ,TARGET
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,PLAN_TYPE
+        ,REPORT_DATE
+)   select
+        SHOP_NAME
+        ,TARGET_YEAR
+        ,TARGET_MONTH
+        ,TARGET
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,PLAN_TYPE
+        ,to_date(REPORT_DATE,'yyyy-MM-dd')
+        from IMPORT_S_SALE_TARGET_TMP_T where TASK_ID = #{taskId} AND PLAN_TYPE = 'year'
+    </insert>
+    <delete id="deleteByTaskId">
+
+        delete  from IMPORT_S_SALE_TARGET_T where TARGET_YEAR =
+        (
+        select TARGET_YEAR from IMPORT_S_SALE_TARGET_TMP_T where TASK_ID = #{taskId}and rownum=1 AND PLAN_TYPE = 'year') AND PLAN_TYPE = 'year'
+
+    </delete>
+
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID
+        ,SHOP_NAME
+        ,TARGET_YEAR
+        ,TARGET_MONTH
+        ,TARGET
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,PLAN_TYPE
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+
+        from IMPORT_S_SALE_TARGET_TMP_T
+
+        where  TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+        and PLAN_TYPE = 'year'
+
+    </select>
+
+    <update id="updateValidStatusByDataIds" >
+        update IMPORT_S_SALE_TARGET_TMP_T set VALID_STATUS = #{validStatusCode} where DATA_ID in
+
+        <foreach item="item"  index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_SALE_TARGET_TMP_T where VALID_STATUS != 1 and TASK_ID = #{taskId}
+    </select>
+
+    <!-- 查询 -->
+    <select id="search" resultMap="BaseResultMap">
+
+        select
+        A.*
+        from (
+        SELECT T.*, rownum rn FROM (select * from IMPORT_S_SALE_TARGET_T order by TARGET_YEAR desc ,TARGET_MONTH desc ,SHOP_NAME asc ) T
+        WHERE 1=1
+        <include refid="searchWhereSql"/>
+        ) A
+        WHERE
+        rn BETWEEN #{startRow}
+        AND #{endRow}
+        <include refid="searchWhereSql"/>
+
+    </select>
+
+    <select id="querySearchTotal" resultType="integer">
+        select count(1) from IMPORT_S_SALE_TARGET_T WHERE 1=1
+        <include refid="searchWhereSql"/>
+    </select>
+
+    <sql id="searchWhereSql">
+        and PLAN_TYPE = 'year'
+        <if test="searchParam.shopName != null and searchParam.shopName.size>0">
+            and SHOP_NAME in
+            <foreach item="item"  index="index" collection="searchParam.shopName" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="searchParam.year != null">
+            and TARGET_YEAR = #{searchParam.year}
+        </if>
+        <if test="searchParam.months != null and searchParam.months.size>0">
+            and TARGET_MONTH in
+            <foreach item="item"  index="index" collection="searchParam.months" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </sql>
+
+
+</mapper>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IUploadFileInfoDao">
+
+    <sql id="uploadFileInfoAtt">
+          DATA_ID as datId,
+          FILE_NAME as fileName,
+          FILE_TYPE as fileType,
+          FILE_PATHE as filePath,
+          FILE_SIZE as fileSize,
+          FILE_HASH_CODE as fileHashCode,
+          CREATION_DATE as creationDate,
+          LAST_UPDATE_DATE as lastUpdateDate,
+          CREATED_BY as createBy,
+          LAST_UPDATED_BY as lastUpdatedBy,
+          VALID_STATUS as validStatus,
+          GROUP_NAME as groupName,
+          REMOTE_FILE_NAME as remoteFileName
+    </sql>
+
+    <resultMap id="uploadFileInfoResultMap" type="cn.com.quanyou.ioc.file.manage.vo.UploadFileInfoBean">
+        <id property="dataId" jdbcType="VARCHAR" column="DATA_ID"/>
+        <result property="fileName" jdbcType="VARCHAR" column="FILE_NAME"/>
+        <result property="fileType" jdbcType="INTEGER" column="FILE_TYPE"/>
+        <result property="filePath" jdbcType="VARCHAR" column="FILE_PATHE"/>
+        <result property="fileSize" jdbcType="INTEGER" column="FILE_SIZE"/>
+        <result property="fileHashCode" jdbcType="VARCHAR" column="FILE_HASH_CODE"/>
+        <result property="creationDate" jdbcType="DATE" column="CREATION_DATE"/>
+        <result property="lastUpdateDate" jdbcType="DATE" column="LAST_UPDATE_DATE"/>
+        <result property="createdBy" jdbcType="VARCHAR" column="CREATED_BY"/>
+        <result property="lastUpdatedBy" jdbcType="VARCHAR" column="LAST_UPDATED_BY"/>
+        <result property="validStatus" jdbcType="INTEGER" column="VALID_STATUS"/>
+        <result property="groupName" jdbcType="VARCHAR" column="GROUP_NAME"/>
+        <result property="remoteFileName" jdbcType="VARCHAR" column="REMOTE_FILE_NAME"/>
+    </resultMap>
+
+    <insert id="add" parameterType="cn.com.quanyou.ioc.file.manage.vo.UploadFileInfoBean">
+        <selectKey keyProperty="dataId" order="BEFORE" resultType="java.lang.String">
+            select SYS_GUID() as dataId from DUAL
+        </selectKey>
+        insert into UPLOAD_FILE_INFO_T(
+            DATA_ID
+            ,FILE_NAME
+            <if test="fileType !=null">
+            ,FILE_TYPE
+            </if>
+            ,FILE_PATHE
+            ,FILE_SIZE
+            ,FILE_HASH_CODE
+            <if test="creationDate !=null">
+            ,CREATION_DATE
+            </if>
+            <if test="lastUpdateDate !=null">
+            ,LAST_UPDATE_DATE
+            </if>
+            ,CREATED_BY
+            ,LAST_UPDATED_BY
+            <if test="validStatus !=null">
+            ,VALID_STATUS
+            </if>
+            ,GROUP_NAME
+            ,REMOTE_FILE_NAME
+          )
+          VALUES (
+            #{dataId,jdbcType=VARCHAR}
+            ,#{fileName,jdbcType=VARCHAR}
+        <if test="fileType !=null">
+            ,#{fileType,jdbcType=INTEGER}
+        </if>
+            ,#{filePath,jdbcType=VARCHAR}
+            ,#{fileSize,jdbcType=INTEGER}
+            ,#{fileHashCode,jdbcType=VARCHAR}
+        <if test="creationDate !=null">
+            ,#{creationDate,jdbcType=DATE}
+        </if>
+        <if test="lastUpdateDate !=null">
+            ,#{lastUpdateDate,jdbcType=DATE}
+        </if>
+            ,#{createdBy,jdbcType=VARCHAR}
+            ,#{lastUpdatedBy,jdbcType=VARCHAR}
+        <if test="validStatus !=null">
+            ,#{validStatus,jdbcType=INTEGER}
+        </if>
+            ,#{groupName,jdbcType=VARCHAR}
+            ,#{remoteFileName,jdbcType=VARCHAR}
+          )
+
+    </insert>
+
+    <select id="queryListByEntity" resultMap="uploadFileInfoResultMap">
+        select * from UPLOAD_FILE_INFO_T
+        where 1=1
+        <if test="dataId !=null">
+            and DATA_ID = #{dataId,jdbcType=VARCHAR}
+        </if>
+        <if test="fileName !=null">
+            and FILE_NAME = #{fileName,jdbcType=VARCHAR}
+        </if>
+        <if test="fileType !=null">
+            and FILE_TYPE = #{fileType,jdbcType=INTEGER}
+        </if>
+        <if test="filePath !=null">
+            and FILE_PATHE = #{ filePath,jdbcType=VARCHAR}
+        </if>
+        <if test="fileSize !=null">
+            and FILE_SIZE = #{ fileSize,jdbcType=INTEGER}
+        </if>
+        <if test="fileHashCode !=null">
+            and FILE_HASH_CODE = #{ fileHashCode,jdbcType=VARCHAR}
+        </if>
+        <if test="createBy !=null">
+            and CREATED_BY = #{ createBy,jdbcType=VARCHAR}
+        </if>
+        <if test="lastUpdatedBy !=null">
+            and LAST_UPDATED_BY = #{ lastUpdatedBy,jdbcType=VARCHAR}
+        </if>
+        <if test="validStatus !=null">
+            and VALID_STATUS = #{ validStatus,jdbcType=INTEGER}
+        </if>
+        <if test="creationDate !=null">
+            and CREATION_DATE = #{ creationDate,jdbcType=DATE}
+        </if>
+        <if test="lastUpdateDate !=null">
+            and LAST_UPDATE_DATE = #{ lastUpdateDate,jdbcType=DATE}
+        </if>
+        <if test="groupName !=null">
+            and GROUP_NAME = #{ groupName,jdbcType=VARCHAR}
+        </if>
+        <if test="remoteFileName !=null">
+            and REMOTE_FILE_NAME = #{ remoteFileName,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <select id="queryEntityByPrimaryKey" resultMap="uploadFileInfoResultMap">
+        select
+          *
+          from UPLOAD_FILE_INFO_T
+
+          WHERE DATA_ID = #{dataId}
+
+    </select>
+    
+    <select id="queryEntityByFileHashCode" resultMap="uploadFileInfoResultMap">
+        select
+          *
+          from UPLOAD_FILE_INFO_T
+          where FILE_HASH_CODE = #{fileHashCode}
+
+    </select>
+
+    <update id="updateByPrimaryKey" parameterType="cn.com.quanyou.ioc.file.manage.vo.UploadFileInfoBean">
+      update UPLOAD_FILE_INFO_T set
+      LAST_UPDATE_DATE = sysdate
+        <if test="fileName !=null">
+      ,FILE_NAME = #{fileName,jdbcType=VARCHAR}
+        </if>
+        <if test="fileType !=null">
+      ,FILE_TYPE = #{fileType,jdbcType=INTEGER}
+        </if>
+        <if test="filePath !=null">
+      ,FILE_PATHE = #{ filePath,jdbcType=VARCHAR}
+        </if>
+        <if test="fileSize !=null">
+      ,FILE_SIZE = #{ fileSize,jdbcType=INTEGER}
+        </if>
+        <if test="fileHashCode !=null">
+      ,FILE_HASH_CODE = #{ fileHashCode,jdbcType=VARCHAR}
+        </if>
+        <if test="createBy !=null">
+      ,CREATED_BY = #{ createBy,jdbcType=VARCHAR}
+        </if>
+        <if test="lastUpdatedBy !=null">
+      ,LAST_UPDATED_BY = #{ lastUpdatedBy,jdbcType=VARCHAR}
+        </if>
+        <if test="validStatus !=null">
+      ,VALID_STATUS = #{ validStatus,jdbcType=INTEGER}
+        </if>
+        <if test="groupName !=null">
+          , GROUP_NAME = #{ groupName,jdbcType=VARCHAR}
+        </if>
+        <if test="remoteFileName !=null">
+            , REMOTE_FILE_NAME = #{ remoteFileName,jdbcType=VARCHAR}
+        </if>
+      where DATA_ID = #{dataId}
+    </update>
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.ICdsProcessPieceTiDao">
+
+    <insert id="cloneFromTempT" statementType="CALLABLE">
+        {call ioccds.PIECE_WORK_INFO_ADD(#{taskId,mode=IN,jdbcType=VARCHAR})}
+    </insert>
+
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_CDS_PROCESS_PIECE_TI
+        (PIECE_DATE,
+        FACTORY_CODE,
+        LINE_CODE,
+        PROCESS_NAME,
+        EMPLOYEE_NAME,
+        CARD_NO,
+        WORK_HOUR,
+        PIECE_WAGE,
+        ROW_NUMBER,
+        TASK_ID,
+        CREATED_BY,
+        LAST_UPDATED_BY)
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+                select
+                    to_char(#{item.pieceDate,jdbcType=VARCHAR},'yyyymmdd'),
+                    #{item.factoryCode,jdbcType=VARCHAR},
+                    #{item.lineCode,jdbcType=VARCHAR},
+                    REPLACE(#{item.processName,jdbcType=VARCHAR},' ',''),
+                    REPLACE(#{item.employeeName,jdbcType=VARCHAR},' ',''),
+                    REPLACE(#{item.cardNo,jdbcType=VARCHAR},' ',''),
+                    #{item.workHour,jdbcType=VARCHAR},
+                    #{item.pieceWage,jdbcType=VARCHAR},
+                    #{item.rowNumber,jdbcType=INTEGER},
+                    #{item.taskId,jdbcType=VARCHAR},
+                    #{item.createdBy,jdbcType=INTEGER},
+                    #{item.lastUpdatedBy,jdbcType=VARCHAR}
+                from dual
+            )
+        </foreach>
+    </insert>
+
+
+
+    <select id="queryByTaskId" resultType="map">
+        select
+            DATA_ID,
+            PIECE_DATE,
+            FACTORY_CODE,
+            LINE_CODE,
+            PROCESS_NAME,
+            EMPLOYEE_NAME,
+            CARD_NO,
+            WORK_HOUR,
+            PIECE_WAGE,
+            ROW_NUMBER ,
+            TASK_ID
+        from IMPORT_CDS_PROCESS_PIECE_TI
+        where TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+    </select>
+
+    <update id="updateValidStatusByDataIds">
+        update IMPORT_CDS_PROCESS_PIECE_TI set VALID_STATUS = #{validStatusCode} where DATA_ID in
+        <foreach item="item" index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_CDS_PROCESS_PIECE_TI where TASK_ID = #{taskId} and VALID_STATUS != 1
+    </select>
+
+    <select id="listProcessNameList" resultType="cn.com.quanyou.ioc.file.manage.vo.CdsProcessPieceVo">
+        SELECT
+           process_name as processName,
+           factory_name as factoryName,
+           line_name as lineName
+        FROM ioccds.dim_cds_factory_line_process_v
+        WHERE factory_code = #{factoryCode} AND line_code = #{lineCode}
+    </select>
+
+    <select id="listEmployeeInfo" resultType="cn.com.quanyou.ioc.file.manage.vo.CdsEmployeeInfoVo">
+        SELECT
+            employee_name as employeeName,
+            employee_pin as cardNo
+        FROM ioccds.ods_employee_info_t
+    </select>
+</mapper>

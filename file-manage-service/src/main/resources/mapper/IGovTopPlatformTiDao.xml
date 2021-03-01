@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IGovTopPlatformTiDao">
+
+    <insert id="cloneFromTempT">
+    insert into IMPORT_GOV_TOP_PLATFORM_T(
+        RANK_NO,
+        RANK_REMARK,
+        CREATED_BY,
+        LAST_UPDATED_BY
+    )
+    select
+        RANK_NO,
+        RANK_REMARK,
+        CREATED_BY,
+        LAST_UPDATED_BY
+    from IMPORT_GOV_TOP_PLATFORM_TI where TASK_ID = #{taskId}
+    </insert>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_GOV_TOP_PLATFORM_TI(
+            RANK_NO,
+            RANK_REMARK,
+            CREATED_BY,
+            LAST_UPDATED_BY,
+            ROW_NUMBER,
+            TASK_ID
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+                select
+                    #{item.rankNo,jdbcType=VARCHAR},
+                    #{item.rankRemark,jdbcType=VARCHAR},
+                    #{item.createdBy,jdbcType=VARCHAR},
+                    #{item.lastUpdatedBy,jdbcType=VARCHAR},
+                    #{item.rowNumber,jdbcType=INTEGER},
+                    #{item.taskId,jdbcType=VARCHAR}
+                from dual
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteByTaskId">
+        DELETE FROM IMPORT_GOV_TOP_PLATFORM_T
+    </delete>
+
+    <select id="queryByTaskId" resultType="map">
+        select
+            DATA_ID,
+            RANK_NO,
+            RANK_REMARK,
+            ROW_NUMBER ,
+            TASK_ID
+        from IMPORT_GOV_TOP_PLATFORM_TI
+        where TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+    </select>
+
+    <update id="updateValidStatusByDataIds">
+        update IMPORT_GOV_TOP_PLATFORM_TI set VALID_STATUS = #{validStatusCode} where DATA_ID in
+        <foreach item="item" index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_GOV_TOP_PLATFORM_TI where TASK_ID = #{taskId} and VALID_STATUS != 1
+    </select>
+
+</mapper>

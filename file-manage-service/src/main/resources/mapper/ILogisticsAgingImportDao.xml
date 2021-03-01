@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.ILogisticsAgingImportDao">
+    <resultMap id="BaseResultMap" type="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.LogisticsAgingTi">
+        <id column="DATA_ID" jdbcType="VARCHAR" property="dataId" />
+        <result column="DATE_CODE" jdbcType="VARCHAR" property="dateCode" />
+        <result column="COMPANY_NAME" jdbcType="VARCHAR" property="companyName" />
+        <result column="TIME_EXPEND" jdbcType="VARCHAR" property="timeExpend" />
+        <result column="CREATION_DATE" jdbcType="TIMESTAMP" property="creationDate" />
+        <result column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" property="lastUpdateDate" />
+        <result column="LAST_UPDATED_BY" jdbcType="VARCHAR" property="lastUpdatedBy" />
+    </resultMap>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_LOGISTICS_AGING_TI
+        (
+         DATE_CODE,
+         COMPANY_NAME,
+         TIME_EXPEND,
+         CREATED_BY,
+         LAST_UPDATED_BY,
+         TASK_ID,
+         ROW_NUMBER
+        )
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+                select
+                    #{item.dateCode,jdbcType=VARCHAR}
+                    ,#{item.companyName,jdbcType=VARCHAR}
+                    ,#{item.timeExpend,jdbcType=VARCHAR}
+                    ,#{item.createdBy,jdbcType=VARCHAR}
+                    ,#{item.lastUpdatedBy,jdbcType=VARCHAR}
+                    ,#{item.taskId,jdbcType=VARCHAR}
+                    ,#{item.rowNumber,jdbcType=VARCHAR}
+                from dual
+            )
+        </foreach>
+    </insert>
+
+    <insert id="cloneFromTempT">
+    insert into IMPORT_LOGISTICS_AGING_T (
+        DATE_CODE,
+        COMPANY_NAME,
+        TIME_EXPEND,
+        CREATED_BY,
+        LAST_UPDATED_BY)
+      select
+        DATE_CODE,
+        COMPANY_NAME,
+        TIME_EXPEND,
+        CREATED_BY,
+        LAST_UPDATED_BY
+        from IMPORT_LOGISTICS_AGING_TI where TASK_ID = #{taskId}
+    </insert>
+
+    <delete id="deleteByTaskId">
+        delete  from IMPORT_LOGISTICS_AGING_T where DATE_CODE =
+        (
+            select DATE_CODE from IMPORT_LOGISTICS_AGING_TI
+            where TASK_ID = #{taskId} and rownum = 1
+        )
+    </delete>
+
+    <select id="queryByTaskId" resultType="map">
+        select
+            DATA_ID,
+            DATE_CODE,
+            COMPANY_NAME,
+            TIME_EXPEND,
+            CREATED_BY,
+            LAST_UPDATED_BY,
+            TASK_ID,
+            ROW_NUMBER
+        from IMPORT_LOGISTICS_AGING_TI
+        where  TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+    </select>
+
+    <update id="updateValidStatusByDataIds" >
+        update IMPORT_LOGISTICS_AGING_TI set VALID_STATUS = #{validStatusCode} where DATA_ID in
+        <foreach item="item"  index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_LOGISTICS_AGING_TI where VALID_STATUS != 1 and TASK_ID = #{taskId}
+    </select>
+
+</mapper>

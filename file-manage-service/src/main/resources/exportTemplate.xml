@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<files>
+    <file name="evaluateInfo" fileName="评价信息">
+        <sheet id="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.EvaluateNegativeDetailBean"></sheet>
+    </file>
+    <file name="ServiceBellwetherTaobao" fileName="淘宝风向标">
+        <sheet id="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.ServiceBellwetherTaobaoBean"></sheet>
+        <sheet id="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.EvaluateNegativeDetailBean"></sheet>
+    </file>
+    <sheets>
+        <sheet name="淘宝风向标" id="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.ServiceBellwetherTaobaoBean">
+            <headers>
+                <header>
+                    <column>
+                        <porperty name="headerName" value="店铺"></porperty><!--表土名称-->
+                        <porperty name="rowNum" value="2"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="无忧购星级考核"></porperty><!--表头名称-->
+                        <porperty name="columnNum" value="6"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="基础服务考核"></porperty><!--表头名称-->
+                        <porperty name="columnNum" value="6"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="一键求助满意率"></porperty><!--表土名称-->
+                        <porperty name="rowNum" value="2"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="三年质保48H响应率"></porperty><!--表土名称-->
+                        <porperty name="rowNum" value="2"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="三年质保15天完结率"></porperty><!--表土名称-->
+                        <porperty name="rowNum" value="2"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="异常报备"></porperty><!--表土名称-->
+                        <porperty name="rowNum" value="2"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                    </column>
+                </header>
+                <header>
+                    <column>
+                        <porperty name="headerName" value="总评分"></porperty><!--表头名称-->
+                        <porperty name ="columnIndex" value="1"></porperty>
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="商品体验"></porperty><!--表头名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="物流体验"></porperty><!--表头名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="售后体验"></porperty><!--表头名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="纠纷投诉"></porperty><!--表头名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="咨询体验"></porperty><!--表头名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="总评分-基础"></porperty><!--表头名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="商品体验-基础"></porperty><!--表头名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="物流体验-基础"></porperty><!--表头名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="售后体验-基础"></porperty><!--表头名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="纠纷投诉-基础"></porperty><!--表头名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value="咨询体验-基础"></porperty><!--表头名称-->
+                    </column>
+                </header>
+            </headers>
+            <columns>
+                <column>
+                    <porperty name="fieldName" value="shopName"></porperty>
+                </column>
+                <column>
+                    <porperty name="fieldName" value="totalGradeCarefreeBuy"></porperty>
+                    <porperty name="fieldType" value="String"></porperty>
+                </column>
+                <column>
+                    <porperty name="fieldName" value="productExperienceCarefreeBuy"></porperty>
+                    <porperty name="fieldType" value="String"></porperty>
+                </column>
+            </columns>
+
+        </sheet>
+
+        <sheet name="评价信息" id="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.EvaluateInfoBean">
+            <headers>
+                <header>
+                    <column>
+                        <porperty name="headerName" value="店铺"></porperty><!--表土名称-->
+                        <porperty name="columnNum" value="3"></porperty><!--合并单元格列数 默认为1,可不指定 -->
+                        <porperty name="rowNum" value="2"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value ="评价日期"></porperty>
+                    </column>
+                    <column>
+                        <porperty name="headerName" value ="评价数量"></porperty>
+                    </column>
+                </header>
+            </headers>
+            <columns>
+                <column>
+                    <porperty name="fieldName" value="shopName"></porperty>
+                    <porperty name="fieldType" value="String"></porperty>
+                    <porperty name="columnNum" value="1"></porperty><!--合并单元格列数 默认为1,可不指定 -->
+                    <porperty name="rowNum" value="1"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                </column>
+                <column>
+                    <porperty name="fieldName" value="reviewDate"></porperty>
+                    <porperty name="fieldType" value="Date" formate="yyyyMMdd"></porperty>
+                </column>
+                <column>
+                    <porperty name="fieldName" value="evaluateNum"></porperty>
+                    <porperty name="fieldType" value="Integer"></porperty>
+                </column>
+            </columns>
+        </sheet>
+        <sheet name="差评信息" id="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.EvaluateNegativeDetailBean">
+            <headers>
+                <header>
+                    <column>
+                        <porperty name="headerName" value="评价日期"></porperty><!--表土名称-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value ="受理日期"></porperty>
+                    </column>
+                    <column>
+                        <porperty name="headerName" value ="店铺"></porperty>
+                    </column>
+                </header>
+            </headers>
+            <columns>
+                <column>
+                    <porperty name="fieldName" value="evaluateDate"></porperty>
+                    <porperty name="fieldType" value="Date" formate="yyyyMMdd"></porperty>
+                </column>
+                <column>
+                    <porperty name="fieldName" value="acceptDate"></porperty>
+                    <porperty name="fieldType" value="Date" formate="yyyyMMdd"></porperty>
+                </column>
+                <column>
+                    <porperty name="fieldName" value="shopName"></porperty>
+                    <porperty name="fieldType" value="String"></porperty>
+                </column>
+            </columns>
+        </sheet>
+        <sheet name="示例说明" id="">
+            <headers>
+                <header>
+                    <column>
+                        <porperty name="headerName" value="店铺"></porperty><!--表土名称-->
+                        <porperty name="columnNum" value="3"></porperty><!--合并单元格列数 默认为1,可不指定 -->
+                        <porperty name="rowNum" value="2"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                    </column>
+                    <column>
+                        <porperty name="headerName" value ="评价日期"></porperty>
+                    </column>
+                    <column>
+                        <porperty name="headerName" value ="评价数量"></porperty>
+                    </column>
+                </header>
+            </headers>
+            <columns>
+                <column>
+                    <porperty name="fieldName" value="shopName"></porperty>
+                    <porperty name="fieldType" value="String"></porperty>
+                    <porperty name="columnNum" value="1"></porperty><!--合并单元格列数 默认为1,可不指定 -->
+                    <porperty name="rowNum" value="1"></porperty><!--合并单元格行数 默认为1,可不指定-->
+                </column>
+                <column>
+                    <porperty name="fieldName" value="reviewDate"></porperty>
+                    <porperty name="fieldType" value="Date" formate="yyyyMMdd"></porperty>
+                </column>
+                <column>
+                    <porperty name="fieldName" value="evaluateNum"></porperty>
+                    <porperty name="fieldType" value="Integer"></porperty>
+                </column>
+            </columns>
+        </sheet>
+    </sheets>
+</files>

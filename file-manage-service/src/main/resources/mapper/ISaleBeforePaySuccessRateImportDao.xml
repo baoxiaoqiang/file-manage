@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.ISaleBeforePaySuccessRateImportDao">
+
+    <resultMap id="BaseResultMap" type="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.PaySuccessRateBean">
+        <id column="DATA_ID" jdbcType="VARCHAR" property="dataId" />
+        <result column="SALE_DATE" jdbcType="TIMESTAMP" property="saleDate" />
+        <result column="SHOP_NAME" jdbcType="VARCHAR" property="shopName" />
+        <result column="USER_NAME" jdbcType="VARCHAR" property="userName" />
+        <result column="ASK_PAY_RATE" jdbcType="NUMERIC" property="askPayRate" />
+        <result column="CREATION_DATE" jdbcType="TIMESTAMP" property="creationDate" />
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy" />
+        <result column="LAST_UPDATE_DATE" jdbcType="TIMESTAMP" property="lastUpdateDate" />
+        <result column="LAST_UPDATED_BY" jdbcType="VARCHAR" property="lastUpdatedBy" />
+    </resultMap>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO IMPORT_S_PAY_SUCCESS_RATE_TMP_T
+        (
+        SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,ASK_PAY_RATE
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        )
+        select a.* from (
+        <foreach item="item" index="index" collection="list" separator="union all">
+            select
+            #{item.saleDate,jdbcType=VARCHAR} SALE_DATE
+            ,#{item.shopName,jdbcType=VARCHAR} SHOP_NAME
+            ,#{item.userName,jdbcType=VARCHAR} USER_NAME
+            ,#{item.askPayRate,jdbcType=VARCHAR} ASK_PAY_RATE
+            ,#{item.createdBy,jdbcType=VARCHAR} CREATED_BY
+            ,#{item.lastUpdatedBy,jdbcType=VARCHAR} LAST_UPDATED_BY
+            ,#{item.rowNumber,jdbcType=INTEGER} ROW_NUMBER
+            ,#{item.taskId,jdbcType=VARCHAR} TASK_ID
+            ,#{item.reportDate,jdbcType=VARCHAR} REPORT_DATE
+            from dual
+        </foreach>
+        ) a
+    </insert>
+
+    <insert id="cloneFromTempT">
+    insert into IMPORT_S_PAY_SUCCESS_RATE_T (
+        SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,ASK_PAY_RATE
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+)   select
+        to_date(SALE_DATE,'yyyyMMdd')
+        ,SHOP_NAME
+        ,USER_NAME
+        ,ASK_PAY_RATE
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        from IMPORT_S_PAY_SUCCESS_RATE_TMP_T where TASK_ID = #{taskId}
+    </insert>
+    <delete id="deleteByTaskId">
+
+        delete  from IMPORT_S_PAY_SUCCESS_RATE_T where SALE_DATE =
+        (
+        select to_date(SALE_DATE,'yyyyMMdd') from IMPORT_S_PAY_SUCCESS_RATE_TMP_T where TASK_ID = #{taskId}and rownum=1)
+
+    </delete>
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID
+        ,SALE_DATE
+        ,SHOP_NAME
+        ,USER_NAME
+        ,ASK_PAY_RATE
+        ,CREATED_BY
+        ,LAST_UPDATED_BY
+        ,ROW_NUMBER
+        ,TASK_ID
+        ,REPORT_DATE
+        from IMPORT_S_PAY_SUCCESS_RATE_TMP_T
+
+        where  TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+
+    </select>
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_PAY_SUCCESS_RATE_TMP_T where VALID_STATUS != 1 and TASK_ID = #{taskId}
+    </select>
+    <update id="updateValidStatusByDataIds" >
+        update IMPORT_S_PAY_SUCCESS_RATE_TMP_T set VALID_STATUS = #{validStatusCode} where DATA_ID in
+
+        <foreach item="item"  index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+</mapper>

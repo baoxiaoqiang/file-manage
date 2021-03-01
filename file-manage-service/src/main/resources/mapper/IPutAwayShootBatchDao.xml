@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IPutAwayShootBatchDao">
+
+    <insert id="cloneFromTempT">
+        {call iocemall.EMALL_NEW_PRODUCT_IMP_PKG.update_photo_batch(#{taskId,mode=IN,jdbcType=VARCHAR})}
+    </insert>
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO import_s_putaway_ti
+        (product_type,
+        spu_code,
+        product_batch,
+        row_number,
+        task_id,
+        created_by,
+        last_updated_by,
+        re_shooting_reason,
+        photo_batch_date_code)
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.productType,jdbcType=VARCHAR},
+            #{item.spuCode,jdbcType=VARCHAR},
+            #{item.productBatch,jdbcType=VARCHAR},
+            #{item.rowNumber,jdbcType=INTEGER},
+            #{item.taskId,jdbcType=VARCHAR},
+            #{item.createdBy,jdbcType=VARCHAR},
+            #{item.lastUpdatedBy,jdbcType=VARCHAR},
+            #{item.reShootingReason,jdbcType=VARCHAR},
+            #{item.photoBatchDateCode,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID,
+        product_type,
+        spu_code,
+        product_batch,
+        row_number,
+        task_id,
+        re_shooting_reason,
+        photo_batch_date_code
+        from IMPORT_S_PUTAWAY_TI
+        where TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+    </select>
+
+    <update id="updateValidStatusByDataIds">
+        update IMPORT_S_PUTAWAY_TI set VALID_STATUS = #{validStatusCode} where DATA_ID in
+        <foreach item="item" index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from IMPORT_S_PUTAWAY_TI where TASK_ID = #{taskId} and VALID_STATUS != 1
+    </select>
+
+    <select id="existCheck" resultType="integer"
+            parameterType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.PutAwayTiForShootBatch">
+        select count(1) from EMALL_NEW_PRODUCT_T T1
+        where t1.spu_code = #{spuCode} and t1.batch_date_code = #{productBatch}
+    </select>
+
+    <select id="onlyCheck" resultType="integer"
+            parameterType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.PutAwayTiForShootBatch">
+        SELECT COUNT(1)
+          FROM emall_new_product_t t1
+          LEFT JOIN emall_photo_record_t t2
+            ON t1.data_id = t2.spu_id
+        where t1.spu_code = #{spuCode} and t2.photo_batch_date_code = #{photoBatchDateCode}
+    </select>
+
+    <select id="onlyCheckForType" resultType="integer"
+            parameterType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.PutAwayTiForShootBatch">
+        /*只校验新品，其他的用99表示*/
+        SELECT COUNT(1)
+          FROM emall_new_product_t t1
+          LEFT JOIN emall_photo_record_t t2
+            ON t1.data_id = t2.spu_id
+        where t1.spu_code = #{spuCode} and t2.new_type_code = decode(#{productType},'新品',1,99)
+    </select>
+
+</mapper>

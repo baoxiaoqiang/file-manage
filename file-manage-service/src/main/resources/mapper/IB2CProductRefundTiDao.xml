@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.quanyou.ioc.file.manage.dao.IB2CProductRefundTiDao">
+
+    <insert id="cloneFromTempT">
+        MERGE INTO iocemall.emall_refund_apply_t t
+        USING (SELECT t1.*, t2.code AS shop_code, t3.code AS agency_code
+                 FROM import_b2c_product_refund_ti t1
+                 LEFT JOIN iocemall.r_b2c_store_t t2
+                   ON t1.shop_name = t2.name
+                 LEFT JOIN iocemall.r_base_organization_t t3
+                   ON t1.agency = t3.name
+                where t1.task_id=#{taskId}) a
+        ON (t.pcode = a.PLATFORM_NO)
+        WHEN MATCHED THEN
+          UPDATE
+             SET t.store_code               = a.shop_code,
+                 t.store_name               = a.shop_name,
+                 t.org_code                 = a.agency_code,
+                 t.org_name                 = a.agency,
+                 t.order_time               = to_date(a.order_time,
+                                                      'yyyy-mm-dd hh24:mi:ss'),
+                 t.sku_code                 = a.product_code,
+                 t.sku_name                 = a.product_name,
+                 t.member_name              = a.customer_id,
+                 t.orderreceiver_address    = a.receiving_address,
+                 t.refund_apply_num         = a.refund_count,
+                 t.refundable_amount        = a.refundable_amount,
+                 t.refund_apply_amount      = a.refund_application_amount,
+                 t.refund_reason            = a.refund_reason,
+                 t.refund_property_name     = a.refund_nature,
+                 t.verify_result            = a.results,
+                 t.subject_toliability_name = a.subject_toliability,
+                 t.last_updated_by          = a.last_updated_by,
+                 t.deal_date                = to_date(a.process_date,
+                                                      'yyyy-mm-dd hh24:mi:ss')
+        WHEN NOT MATCHED THEN
+          INSERT
+            (ID,
+             pcode,
+             refundable_amount,
+             refund_reason,
+             verify_result,
+             subject_toliability_name,
+             refund_property_name,
+             deal_date,
+             dr,
+             refund_apply_amount,
+             order_time,
+             member_name,
+             org_name,
+             org_code,
+             sku_code,
+             sku_name,
+             refund_apply_num,
+             orderreceiver_address,
+             store_code,
+             store_name,
+             created_by,
+             last_updated_by,
+             source_sys)
+          VALUES
+            (iocemall.emall_refund_apply_s.nextval,
+             a.platform_no,
+             a.refundable_amount,
+             a.refund_reason,
+             a.results,
+             a.subject_toliability,
+             a.refund_nature,
+             to_date(a.process_date, 'yyyy-mm-dd hh24:mi:ss'),
+             0,
+             a.refund_application_amount,
+             to_date(a.order_time, 'yyyy-mm-dd hh24:mi:ss'),
+             a.customer_id,
+             a.agency,
+             a.agency_code,
+             a.product_code,
+             a.product_name,
+             a.refund_count,
+             a.receiving_address,
+             a.shop_code,
+             a.shop_name,
+             a.created_by,
+             a.last_updated_by,
+             'EXCEL')
+    </insert>
+
+
+    <insert id="addBatchMap" parameterType="map">
+        INSERT INTO import_b2c_product_refund_ti
+        (shop_name,
+        agency,
+        platform_no,
+        order_time,
+        product_code,
+        customer_id,
+        receiving_address,
+        product_name,
+        refund_count,
+        refundable_amount,
+        refund_application_amount,
+        refund_reason,
+        refund_nature,
+        subject_toliability,
+        results,
+        process_date,
+        row_number,
+        task_id,
+        created_by,
+        last_updated_by)
+        <foreach item="item" index="index" collection="list" separator="union all">
+            (
+            select
+            #{item.shopName,jdbcType=VARCHAR},
+            #{item.agency,jdbcType=VARCHAR},
+            #{item.platformNo,jdbcType=VARCHAR},
+            #{item.orderTime,jdbcType=VARCHAR},
+            #{item.productCode,jdbcType=VARCHAR},
+            #{item.customerId,jdbcType=VARCHAR},
+            #{item.receivingAddress,jdbcType=VARCHAR},
+            #{item.productName,jdbcType=VARCHAR},
+            #{item.refundCount,jdbcType=VARCHAR},
+            #{item.refundableAmount,jdbcType=VARCHAR},
+            #{item.refundApplicationAmount,jdbcType=VARCHAR},
+            #{item.refundReason,jdbcType=VARCHAR},
+            #{item.refundNature,jdbcType=VARCHAR},
+            #{item.subjectToliability,jdbcType=VARCHAR},
+            #{item.results,jdbcType=VARCHAR},
+            #{item.processDate,jdbcType=VARCHAR},
+            #{item.rowNumber,jdbcType=VARCHAR},
+            #{item.taskId,jdbcType=VARCHAR},
+            #{item.createdBy,jdbcType=VARCHAR},
+            #{item.lastUpdatedBy,jdbcType=VARCHAR}
+            from dual
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="queryByTaskId" resultType="map">
+        select
+        DATA_ID,
+        SHOP_NAME,
+        AGENCY,
+        PLATFORM_NO,
+        ORDER_TIME,
+        PRODUCT_CODE,
+        CUSTOMER_ID,
+        RECEIVING_ADDRESS,
+        PRODUCT_NAME,
+        REFUND_COUNT,
+        REFUNDABLE_AMOUNT,
+        REFUND_APPLICATION_AMOUNT,
+        REFUND_REASON,
+        REFUND_NATURE,
+        SUBJECT_TOLIABILITY,
+        RESULTS,
+        PROCESS_DATE,
+        ROW_NUMBER ,
+        TASK_ID
+        from import_b2c_product_refund_ti
+        where TASK_ID = #{taskId}
+        <if test="validStatus != null">
+            AND VALID_STATUS = #{validStatus}
+        </if>
+    </select>
+
+    <update id="updateValidStatusByDataIds">
+        update import_b2c_product_refund_ti set VALID_STATUS = #{validStatusCode} where DATA_ID in
+        <foreach item="item" index="index" collection="dataIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="queryMistakeAndUncheckedCount" resultType="integer">
+        select count(1) from import_b2c_product_refund_ti where TASK_ID = #{taskId} and VALID_STATUS != 1
+    </select>
+
+    <select id="getStoreDimList" resultType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.IocemallProductDim">
+        select t.code as code,t.name as name from iocemall.r_b2c_store_t t where t.dr = 0
+    </select>
+
+    <select id="getOrgDimList" resultType="cn.com.quanyou.ioc.file.manage.vo.ExcelImportEntities.IocemallProductDim">
+        select t.code as code,t.name as name from iocemall.r_base_organization_t t  where t.dr = 0
+    </select>
+</mapper>
